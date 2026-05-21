@@ -18,9 +18,9 @@
       --text:       #e8eaf0;
       --text2:      #9499a8;
       --text3:      #5a5f70;
-      --accent:     #00e5a0;
-      --accent2:    #00b87a;
-      --accent-dim: rgba(0,229,160,0.10);
+      --accent:     #7c9fc9;
+      --accent2:    #6389b5;
+      --accent-dim: rgba(124,159,201,0.10);
       --amber:      #f5a623;
       --red:        #ff4d4d;
       --blue:       #4da6ff;
@@ -56,34 +56,28 @@
       position: sticky; top: 0; z-index: 100;
       display: flex; align-items: center; gap: 12px;
       height: 56px; padding: 0 24px;
-      background: var(--bg2); border-bottom: 1px solid var(--border);
+      background: #16181c; border-bottom: 1px solid #2a2d35;
     }
-    .brand { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-    .brandmark {
-      width: 32px; height: 32px; border-radius: 6px; flex-shrink: 0;
-      background: var(--accent); display: flex; align-items: center; justify-content: center;
-      font-family: var(--mono); font-weight: 500; font-size: 13px;
-      color: #0e0f11; letter-spacing: -0.5px;
-    }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
-    .brand-name { font-size: 15px; font-weight: 600; color: var(--text); }
-    .brand-sub  { font-size: 11px; color: var(--text3); }
-    .hdr-sep    { width: 1px; height: 28px; background: var(--border); margin: 0 4px; }
+    .brand-name { font-size: 15px; font-weight: 600; color: #fff; }
+    .brand-sub  { font-size: 11px; color: #5a5f70; font-family: var(--mono); }
+    .hdr-sep    { width: 1px; height: 28px; background: rgba(255,255,255,0.12); margin: 0 4px; }
     .btn-home {
       display: flex; align-items: center; gap: 6px;
       padding: 6px 12px; border-radius: var(--radius);
-      border: 1px solid var(--border); background: transparent;
-      color: var(--text2); font-size: 13px; cursor: pointer; transition: all 0.15s;
+      border: 1px solid rgba(255,255,255,0.12); background: transparent;
+      color: rgba(255,255,255,0.55); font-size: 13px; cursor: pointer; transition: all 0.15s;
     }
-    .btn-home:hover { background: var(--bg3); border-color: var(--border2); color: var(--text); }
+    .btn-home:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.2); color: #fff; }
     .hdr-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
     .btn-icon {
       width: 34px; height: 34px; border-radius: var(--radius);
-      border: 1px solid var(--border); background: transparent;
-      color: var(--text2); display: flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(255,255,255,0.12); background: transparent;
+      color: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center;
       cursor: pointer; transition: all 0.15s;
     }
-    .btn-icon:hover { background: var(--bg3); border-color: var(--border2); color: var(--text); }
+    .btn-icon:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.2); color: #fff; }
 
     /* ── TABS ── */
     .tabs-nav {
@@ -106,7 +100,7 @@
     #pane-generator { flex-direction: row !important; }
 
     /* ── GENERATOR GRID ── */
-    .gen-grid { display: grid; grid-template-columns: 360px 1fr; height: 100%; overflow: hidden; }
+    .gen-grid { display: grid; grid-template-columns: 360px 1fr; height: 100%; overflow: hidden; width: 100%; flex: 1; min-width: 0; }
 
     /* ── INPUT PANEL ── */
     .input-panel {
@@ -178,12 +172,12 @@
     .btn-gen:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* ── OUTPUT PANEL ── */
-    .output-panel { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+    .output-panel { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); min-width: 0; }
     .output-toolbar {
       display: flex; align-items: center; gap: 8px; flex-shrink: 0;
       padding: 10px 20px; background: var(--bg2); border-bottom: 1px solid var(--border);
     }
-    .output-title-wrap { flex: 1; }
+    .output-title-wrap { flex: 1; min-width: 0; }
     .output-title {
       width: 100%; background: none; border: none; outline: none;
       color: var(--text); font-family: var(--font); font-size: 15px; font-weight: 600;
@@ -191,6 +185,10 @@
     .output-title::placeholder { color: var(--text3); }
     .output-title[readonly] { cursor: default; }
     .output-body { flex: 1; overflow-y: auto; padding: 36px 44px; }
+    .edit-indicator {
+      padding: 6px 20px; font-size: 12px; color: var(--amber); flex-shrink: 0;
+      background: rgba(245,166,35,0.07); border-bottom: 1px solid rgba(245,166,35,0.18);
+    }
 
     .btn-action {
       display: flex; align-items: center; gap: 5px;
@@ -218,7 +216,7 @@
     .empty-desc  { font-size: 13px; color: var(--text3); max-width: 300px; line-height: 1.65; }
 
     /* ── SOP DOCUMENT ── */
-    .sop-doc { max-width: 760px; margin: 0 auto; outline: none; }
+    .sop-doc { width: 100%; outline: none; }
     .sop-doc h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
     .sop-meta {
       display: flex; align-items: center; gap: 12px;
@@ -424,7 +422,7 @@
       box-shadow: 0 24px 64px rgba(0,0,0,0.45); overflow: hidden;
     }
     .wiz-progress { height: 4px; background: #e8ecf0; }
-    .wiz-progress-fill { height: 100%; background: #00b87a; transition: width 0.3s; }
+    .wiz-progress-fill { height: 100%; background: #6389b5; transition: width 0.3s; }
     .wiz-hdr { padding: 18px 28px 0; }
     .wiz-step-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #9499a8; }
     .wiz-body { padding: 24px 28px 28px; }
@@ -440,8 +438,7 @@
     .wiz-welcome { text-align: center; padding: 8px 0 16px; }
     .wiz-brandmark {
       width: 56px; height: 56px; border-radius: 14px; margin: 0 auto 18px;
-      background: #00e5a0; display: flex; align-items: center; justify-content: center;
-      font-family: var(--mono); font-size: 18px; font-weight: 500; color: #0e0f11;
+      background: #7c9fc9; display: flex; align-items: center; justify-content: center;
     }
     .wiz-h1 { font-size: 22px; font-weight: 700; color: #1a1d26; margin-bottom: 8px; }
     .wiz-h2 { font-size: 18px; font-weight: 700; color: #1a1d26; margin-bottom: 6px; }
@@ -454,13 +451,13 @@
       border: 2px solid #e8ecf0; cursor: pointer; transition: all 0.15s;
       text-align: center; background: #f8f9fb;
     }
-    .wiz-card:hover { border-color: #00e5a0; }
-    .wiz-card.selected { border-color: #00b87a; background: #f0fdf9; }
+    .wiz-card:hover { border-color: #7c9fc9; }
+    .wiz-card.selected { border-color: #6389b5; background: #f0f5fb; }
     .wiz-card-name { font-size: 12px; font-weight: 600; color: #1a1d26; margin-bottom: 8px; line-height: 1.3; }
     .wiz-card-badge {
       display: inline-block; padding: 2px 7px; border-radius: 20px;
       font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
-      background: rgba(0,184,122,0.12); color: #007a55;
+      background: rgba(124,159,201,0.15); color: #4a6f9a;
     }
 
     .wiz-provider-desc { font-size: 13px; color: #5a5f70; line-height: 1.65; margin-bottom: 18px; }
@@ -468,20 +465,20 @@
     .wiz-step-item { display: flex; gap: 12px; align-items: flex-start; }
     .wiz-step-num {
       width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
-      background: #00e5a0; color: #0e0f11; font-size: 11px; font-weight: 700;
+      background: #7c9fc9; color: #fff; font-size: 11px; font-weight: 700;
       display: flex; align-items: center; justify-content: center;
     }
     .wiz-step-text { font-size: 13px; color: #1a1d26; line-height: 1.55; padding-top: 2px; }
-    .wiz-inline-link { color: #007a55; text-decoration: underline; }
-    .wiz-inline-link:hover { color: #00875a; }
+    .wiz-inline-link { color: #4a6f9a; text-decoration: underline; }
+    .wiz-inline-link:hover { color: #6389b5; }
     .btn-wiz-link {
       display: inline-flex; align-items: center; gap: 6px;
       padding: 10px 18px; border-radius: 8px;
-      background: #00e5a0; color: #0e0f11;
+      background: #7c9fc9; color: #fff;
       font-size: 13px; font-weight: 600; font-family: var(--font);
       text-decoration: none; transition: background 0.15s; border: none; cursor: pointer;
     }
-    .btn-wiz-link:hover { background: #00b87a; }
+    .btn-wiz-link:hover { background: #6389b5; }
 
     .wiz-input-wrap { position: relative; }
     .wiz-show-key {
@@ -489,7 +486,7 @@
       background: none; border: none; cursor: pointer; color: #9499a8; padding: 0; line-height: 0;
     }
     .wiz-key-input { padding-right: 40px; background: #f8f9fb; border-color: #dde0e9; color: #1a1d26; }
-    .wiz-key-input:focus { border-color: #00b87a; outline: none; }
+    .wiz-key-input:focus { border-color: #7c9fc9; outline: none; }
     .btn-wiz-test {
       margin-top: 10px; padding: 7px 14px; border-radius: 6px;
       border: 1px solid #c9cdd9; background: #f4f5f7;
@@ -498,14 +495,14 @@
     .btn-wiz-test:hover:not(:disabled) { border-color: #9499a8; }
     .btn-wiz-test:disabled { opacity: 0.5; cursor: not-allowed; }
     .wiz-test-result { margin-top: 8px; font-size: 13px; font-weight: 500; min-height: 20px; }
-    .wiz-test-result.ok  { color: #007a55; }
+    .wiz-test-result.ok  { color: #4a6f9a; }
     .wiz-test-result.err { color: #cc0000; }
 
     .wiz-complete { text-align: center; padding: 8px 0 16px; }
     .wiz-check {
       width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 20px;
-      background: rgba(0,229,160,0.15); border: 2px solid #00e5a0;
-      display: flex; align-items: center; justify-content: center; color: #007a55;
+      background: rgba(124,159,201,0.15); border: 2px solid #7c9fc9;
+      display: flex; align-items: center; justify-content: center; color: #4a6f9a;
     }
 
     .btn-wiz {
@@ -515,8 +512,8 @@
       cursor: pointer; font-family: var(--font); transition: all 0.15s;
     }
     .btn-wiz:hover:not(:disabled) { border-color: #9499a8; background: #ebedf2; }
-    .btn-wiz.primary { background: #00e5a0; border-color: #00e5a0; color: #0e0f11; }
-    .btn-wiz.primary:hover { background: #00b87a; border-color: #00b87a; }
+    .btn-wiz.primary { background: #7c9fc9; border-color: #7c9fc9; color: #fff; }
+    .btn-wiz.primary:hover { background: #6389b5; border-color: #6389b5; }
     .btn-wiz:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .btn-block { width: 100%; display: flex; justify-content: center; }
@@ -555,7 +552,16 @@
 <!-- HEADER -->
 <header class="hdr">
   <a href="https://hagans-consulting.github.io/vorpic-homedeck/" class="brand">
-    <div class="brandmark">VP</div>
+    <svg width="36" height="36" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="border-radius:9px;flex-shrink:0">
+      <rect width="48" height="48" rx="11" fill="#7c9fc9"/>
+      <line x1="24" y1="24" x2="13" y2="13" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      <line x1="24" y1="24" x2="35" y2="13" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      <line x1="24" y1="24" x2="24" y2="37" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="13" cy="13" r="3.5" fill="none" stroke="#fff" stroke-width="1.8"/>
+      <circle cx="35" cy="13" r="3.5" fill="none" stroke="#fff" stroke-width="1.8"/>
+      <circle cx="24" cy="37" r="3.5" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.8"/>
+      <circle cx="24" cy="24" r="5" fill="#fff"/>
+    </svg>
     <div class="brand-text">
       <span class="brand-name">Flow</span>
       <span class="brand-sub">Knowledge Base &amp; SOP Generator</span>
@@ -575,7 +581,7 @@
 
 <!-- TABS NAV -->
 <nav class="tabs-nav">
-  <button class="tab-btn active" id="tbtn-generator" onclick="switchTab('generator')">SOP Generator</button>
+  <button class="tab-btn active" id="tbtn-generator" onclick="switchTab('generator')">Create</button>
   <button class="tab-btn"        id="tbtn-library"   onclick="switchTab('library')">Document Library</button>
 </nav>
 
@@ -644,6 +650,7 @@
 
       <!-- RIGHT: OUTPUT -->
       <section class="output-panel">
+        <div id="editIndicator" class="edit-indicator hidden">Editing saved document — changes auto-save on blur</div>
         <div class="output-toolbar">
           <div class="output-title-wrap">
             <input type="text" id="sopTitleInput" class="output-title" placeholder="SOP title will appear here…" readonly>
@@ -717,17 +724,11 @@
     <div class="modal-body">
 
       <div class="settings-sec">
-        <div class="settings-sec-title">AI Provider</div>
+        <div class="settings-sec-title">AI Provider — Groq</div>
         <div class="form-grp">
-          <label class="form-lbl" for="providerSelect">Provider</label>
-          <select id="providerSelect" class="form-select" onchange="onProviderChange()">
-            <option value="gemini">Google Gemini 1.5 Flash</option>
-            <option value="groq">Groq (Llama 3)</option>
-            <option value="openrouter">OpenRouter</option>
-          </select>
-        </div>
-        <div id="providerDetails">
-          <span class="field-hint">Free tier — no key required.</span>
+          <label class="form-lbl">API Key</label>
+          <input type="password" id="groqKeyField" class="form-input" placeholder="gsk_…">
+          <span class="field-hint">Free tier — get your key at <a href="https://console.groq.com" target="_blank" class="hint-link">console.groq.com</a>.</span>
         </div>
       </div>
 
@@ -753,7 +754,7 @@
 
       <div class="settings-sec">
         <div class="settings-sec-title">About</div>
-        <div class="about-mono">Vorpic Flow — v0.3 beta · Hagans Consulting</div>
+        <div class="about-mono">Vorpic Flow — v0.4 beta · Hagans Consulting</div>
       </div>
 
       <div class="settings-sec">
@@ -886,10 +887,11 @@ const SOPStorageService = (() => {
 /* =====================================================================
    APP STATE
    ===================================================================== */
-let darkMode       = true;
-let currentSOPRaw  = '';    // raw AI text of the active SOP
-let currentSOPMeta = null;  // { id, title, category, created_at, ... } if loaded from library
-let attachedFile   = null;  // { name, text }
+let darkMode        = true;
+let currentSOPRaw   = '';
+let currentSOPMeta  = null;
+let attachedFile    = null;
+let editModeActive  = false;
 
 /* =====================================================================
    INIT
@@ -898,12 +900,12 @@ let attachedFile   = null;  // { name, text }
   darkMode = localStorage.getItem('vf-dark') !== 'false';
   applyTheme();
   await renderLibrary();
-  const provider = localStorage.getItem('vorpic_flow_provider') || 'gemini';
-  const LS_KEYS = { gemini: 'vorpic_flow_key_gemini', groq: 'vorpic_flow_key_groq', openrouter: 'vorpic_flow_key_openrouter' };
-  if (!localStorage.getItem(LS_KEYS[provider])) {
+  if (!localStorage.getItem('vorpic_flow_key_groq')) {
     localStorage.removeItem('vorpic_flow_banner_dismissed');
   }
   updateBanner();
+  const sopDoc = document.getElementById('sopDoc');
+  sopDoc.addEventListener('blur', onSOPDocBlur);
   if (!localStorage.getItem('vorpic_flow_onboarded')) showWizard();
 })();
 
@@ -970,33 +972,26 @@ Use these exact bold markdown section headers in this order:
 The Procedure section must use a numbered list. No sections beyond these five.`;
 
 async function generateSOP(userMsg) {
-  const provider = localStorage.getItem('vorpic_flow_provider') || 'gemini';
-  switch (provider) {
-    case 'gemini':    return await callGemini(userMsg);
-    case 'groq':      return await callGroq(userMsg);
-    case 'openrouter': return await callOpenRouter(userMsg);
-    default: throw new Error('Unknown provider: ' + provider);
-  }
+  return await callGroq(userMsg);
 }
 
-async function callGemini(userMsg) {
-  const key = localStorage.getItem('vorpic_flow_key_gemini') || '';
-  if (!key) throw new Error('MISSING_KEY');
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${encodeURIComponent(key)}`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-goog-api-client': 'genai-js/0.21.0' },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: AI_SYSTEM_PROMPT }] },
-      contents: [{ role: 'user', parts: [{ text: userMsg }] }],
-      generationConfig: { maxOutputTokens: 1000 }
-    })
-  });
-  if (!res.ok) {
-    const j = await res.json().catch(() => ({}));
-    throw new Error(j.error?.message || `Gemini API error ${res.status}`);
-  }
-  const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+async function generateSOPTitle(content) {
+  const key = localStorage.getItem('vorpic_flow_key_groq') || '';
+  try {
+    const snippet = content.slice(0, 200);
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'authorization': `Bearer ${key}` },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: `Generate a concise 5-8 word professional title for this SOP document. Return only the title, no quotes, no explanation: ${snippet}` }],
+        max_tokens: 30
+      })
+    });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    return (data.choices?.[0]?.message?.content || '').trim();
+  } catch { return ''; }
 }
 
 async function callGroq(userMsg) {
@@ -1018,40 +1013,12 @@ async function callGroq(userMsg) {
   return data.choices?.[0]?.message?.content || '';
 }
 
-async function callOpenRouter(userMsg) {
-  const key = localStorage.getItem('vorpic_flow_key_openrouter') || '';
-  if (!key) throw new Error('MISSING_KEY');
-  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'authorization': `Bearer ${key}`,
-      'HTTP-Referer': location.origin,
-      'X-Title': 'Vorpic Flow',
-      'X-Data-Policy': 'allow-training'
-    },
-    body: JSON.stringify({
-      model: 'meta-llama/llama-3.3-70b-instruct:free',
-      messages: [{ role: 'system', content: AI_SYSTEM_PROMPT }, { role: 'user', content: userMsg }],
-      transforms: ['middle-out']
-    })
-  });
-  if (!res.ok) {
-    const j = await res.json().catch(() => ({}));
-    throw new Error(j.error?.message || `OpenRouter API error ${res.status}`);
-  }
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content || '';
-}
-
 async function handleGenerate() {
   const raw = document.getElementById('rawInput').value.trim();
   if (!raw && !attachedFile) { toast('Enter some notes or upload a document first.', 'err'); return; }
 
-  const provider = localStorage.getItem('vorpic_flow_provider') || 'gemini';
-  const lsKeys = { gemini: 'vorpic_flow_key_gemini', groq: 'vorpic_flow_key_groq', openrouter: 'vorpic_flow_key_openrouter' };
-  if (!localStorage.getItem(lsKeys[provider])) {
-    toast('This provider requires an API key. Open Settings to add yours.', 'err');
+  if (!localStorage.getItem('vorpic_flow_key_groq')) {
+    toast('API key required. Open Settings to add your Groq key.', 'err');
     openSettings();
     return;
   }
@@ -1065,12 +1032,18 @@ async function handleGenerate() {
   btn.disabled = true;
   btn.innerHTML = '<div class="spin"></div> Generating…';
 
+  exitEditMode();
+
   try {
     currentSOPRaw  = await generateSOP(userMsg);
     currentSOPMeta = null;
 
-    const firstLine = raw.split('\n')[0].trim().replace(/^[#*\->|\s]+/, '');
-    const autoTitle = firstLine.length > 4 ? firstLine.slice(0, 64) : `${category} SOP`;
+    btn.innerHTML = '<div class="spin"></div> Naming…';
+    let autoTitle = await generateSOPTitle(currentSOPRaw);
+    if (!autoTitle) {
+      const firstLine = raw.split('\n')[0].trim().replace(/^[#*\->|\s]+/, '');
+      autoTitle = firstLine.length > 4 ? firstLine.slice(0, 60) : `${category} SOP`;
+    }
 
     const titleEl = document.getElementById('sopTitleInput');
     titleEl.value = autoTitle;
@@ -1082,7 +1055,7 @@ async function handleGenerate() {
 
   } catch (err) {
     if (err.message === 'MISSING_KEY') {
-      toast('This provider requires an API key. Open Settings to add yours.', 'err');
+      toast('API key required. Open Settings to add your Groq key.', 'err');
       openSettings();
     } else {
       toast('Generation failed: ' + err.message, 'err');
@@ -1173,10 +1146,10 @@ function handlePrint() {
     body{font-family:system-ui,sans-serif;max-width:760px;margin:40px auto;color:#1a1d26;line-height:1.7;font-size:14px;}
     h1{font-size:22px;font-weight:700;margin-bottom:8px;}
     .sop-meta{display:flex;align-items:center;gap:12px;padding-bottom:18px;margin-bottom:24px;border-bottom:1px solid #dde0e9;}
-    .sop-badge{padding:2px 10px;border-radius:20px;background:#e0faf4;border:1px solid #00b87a;color:#007a55;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+    .sop-badge{padding:2px 10px;border-radius:20px;background:#e8f0f9;border:1px solid #7c9fc9;color:#4a6f9a;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
     .sop-date{font-size:12px;color:#9499a8;}
     .sop-section{margin-bottom:20px;}
-    .sop-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#00875a;margin-bottom:6px;}
+    .sop-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#7c9fc9;margin-bottom:6px;}
     .sop-section-body{font-size:14px;line-height:1.75;}
     ol{padding-left:20px;}li{margin-bottom:5px;}p{margin-bottom:8px;}
   </style></head><body>${content}</body></html>`);
@@ -1223,6 +1196,7 @@ async function renderLibrary() {
       <td><div class="row-actions">
         <button class="btn-row" onclick="openSOPRecord('${s.id}')">Open</button>
         <button class="btn-row" onclick="editSOPRecord('${s.id}')">Edit</button>
+        <button class="btn-row" onclick="downloadSOPRecord('${s.id}')">Download</button>
         <button class="btn-row danger" onclick="deleteSOPRecord('${s.id}')">Delete</button>
       </div></td>
     </tr>`).join('')}</tbody>
@@ -1246,11 +1220,74 @@ async function openSOPRecord(id) {
 async function editSOPRecord(id) {
   const s = await SOPStorageService.getSOP(id);
   if (!s) return;
-  document.getElementById('rawInput').value   = s.content;
-  document.getElementById('sopCat').value     = s.category;
+  currentSOPRaw  = s.content;
   currentSOPMeta = s;
+  editModeActive = true;
+
+  const titleEl = document.getElementById('sopTitleInput');
+  titleEl.value = s.title;
+  titleEl.removeAttribute('readonly');
+  document.getElementById('sopCat').value = s.category;
+
+  const rawInput = document.getElementById('rawInput');
+  rawInput.value = '';
+  rawInput.placeholder = 'Add new notes to regenerate, or edit the document directly on the right';
+
+  renderSOPDoc(s.title, s.category, s.content, s.created_at);
+  const sopDoc = document.getElementById('sopDoc');
+  sopDoc.setAttribute('contenteditable', 'true');
+
+  document.getElementById('editIndicator').classList.remove('hidden');
+  showOutputActions();
   switchTab('generator');
-  toast('Loaded for editing — update the input and regenerate.', 'ok');
+  toast('Loaded for editing — changes auto-save on blur.', 'ok');
+}
+
+async function downloadSOPRecord(id) {
+  const s = await SOPStorageService.getSOP(id);
+  if (!s) return;
+  const prev = { raw: currentSOPRaw, meta: currentSOPMeta, title: document.getElementById('sopTitleInput').value };
+  currentSOPRaw  = s.content;
+  currentSOPMeta = s;
+  renderSOPDoc(s.title, s.category, s.content, s.created_at);
+  document.getElementById('sopTitleInput').value = s.title;
+  document.getElementById('sopDoc').classList.remove('hidden');
+  document.getElementById('genEmpty').classList.add('hidden');
+  await new Promise(r => setTimeout(r, 50));
+  handleDownload();
+  await new Promise(r => setTimeout(r, 500));
+  currentSOPRaw  = prev.raw;
+  currentSOPMeta = prev.meta;
+  document.getElementById('sopTitleInput').value = prev.title;
+  if (!prev.raw) {
+    document.getElementById('sopDoc').classList.add('hidden');
+    document.getElementById('genEmpty').classList.remove('hidden');
+  }
+}
+
+function exitEditMode() {
+  if (!editModeActive) return;
+  editModeActive = false;
+  document.getElementById('editIndicator').classList.add('hidden');
+  const sopDoc = document.getElementById('sopDoc');
+  sopDoc.setAttribute('contenteditable', 'false');
+  const rawInput = document.getElementById('rawInput');
+  rawInput.placeholder = 'Paste notes, bullet points, or a rough draft...';
+}
+
+async function onSOPDocBlur() {
+  if (!editModeActive || !currentSOPMeta) return;
+  const sopDoc = document.getElementById('sopDoc');
+  const titleEl = document.getElementById('sopTitleInput');
+  const now = new Date().toISOString();
+  const updated = { ...currentSOPMeta, title: titleEl.value.trim() || currentSOPMeta.title, updated_at: now };
+  currentSOPRaw = sopDoc.innerText;
+  updated.content = currentSOPRaw;
+  currentSOPMeta = updated;
+  try {
+    await SOPStorageService.saveSOP(updated);
+    toast('Auto-saved.', 'ok');
+  } catch { /* quota modal shown by service */ }
 }
 
 async function deleteSOPRecord(id) {
@@ -1266,42 +1303,16 @@ async function deleteSOPRecord(id) {
    SETTINGS
    ===================================================================== */
 function openSettings() {
-  const provider = localStorage.getItem('vorpic_flow_provider') || 'gemini';
-  document.getElementById('providerSelect').value = provider;
-  onProviderChange();
+  document.getElementById('groqKeyField').value = localStorage.getItem('vorpic_flow_key_groq') || '';
   document.getElementById('overlaySettings').classList.add('open');
 }
 
 function closeSettings() { document.getElementById('overlaySettings').classList.remove('open'); }
 
-function onProviderChange() {
-  const provider = document.getElementById('providerSelect').value;
-  const el = document.getElementById('providerDetails');
-
-  const configs = {
-    gemini:     { lsKey: 'vorpic_flow_key_gemini',     ph: 'AIzaSy…',  hint: 'Free tier — get a free key at <a href="https://aistudio.google.com/app/apikey" class="hint-link">aistudio.google.com</a>.' },
-    groq:       { lsKey: 'vorpic_flow_key_groq',       ph: 'gsk_…',    hint: 'Free tier — get a free key at <a href="https://console.groq.com" class="hint-link">console.groq.com</a> in under 2 minutes.' },
-    openrouter: { lsKey: 'vorpic_flow_key_openrouter', ph: 'sk-or-…',  hint: 'Free tier — get a free key at <a href="https://openrouter.ai/keys" class="hint-link">openrouter.ai</a>.' }
-  };
-
-  const cfg = configs[provider];
-  if (!cfg) return;
-  el.innerHTML = `<div class="form-grp">
-    <label class="form-lbl">API Key</label>
-    <input type="password" id="providerKeyField" class="form-input" placeholder="${esc(cfg.ph)}">
-    <span class="field-hint">${cfg.hint}</span>
-  </div>`;
-  document.getElementById('providerKeyField').value = localStorage.getItem(cfg.lsKey) || '';
-}
-
 function saveSettings() {
-  const provider = document.getElementById('providerSelect').value;
-  localStorage.setItem('vorpic_flow_provider', provider);
-
-  const lsKeys = { gemini: 'vorpic_flow_key_gemini', groq: 'vorpic_flow_key_groq', openrouter: 'vorpic_flow_key_openrouter' };
-  const keyField = document.getElementById('providerKeyField');
-  if (keyField && lsKeys[provider]) localStorage.setItem(lsKeys[provider], keyField.value.trim());
-
+  const key = document.getElementById('groqKeyField').value.trim();
+  if (key) localStorage.setItem('vorpic_flow_key_groq', key);
+  else localStorage.removeItem('vorpic_flow_key_groq');
   localStorage.setItem('vf-dark', String(darkMode));
   updateBanner();
   closeSettings();
@@ -1312,9 +1323,7 @@ function saveSettings() {
    BANNER
    ===================================================================== */
 function updateBanner() {
-  const provider = localStorage.getItem('vorpic_flow_provider') || 'gemini';
-  const lsKeys = { gemini: 'vorpic_flow_key_gemini', groq: 'vorpic_flow_key_groq', openrouter: 'vorpic_flow_key_openrouter' };
-  const hasKey  = !!localStorage.getItem(lsKeys[provider]);
+  const hasKey    = !!localStorage.getItem('vorpic_flow_key_groq');
   const dismissed = localStorage.getItem('vorpic_flow_banner_dismissed') === 'true';
   const show = !hasKey && !dismissed;
   document.getElementById('setupBanner').classList.toggle('hidden', !show);
@@ -1330,24 +1339,10 @@ function dismissBanner() {
    ONBOARDING WIZARD
    ===================================================================== */
 const WIZARD_PROVIDERS = {
-  gemini: {
-    name: 'Gemini 1.5 Flash',
-    badge: 'Recommended — 1,500 free req/day',
-    desc: 'Google Gemini 1.5 Flash is Google\'s free-tier generative AI, offering up to 1,500 requests per day at no cost via Google AI Studio.',
-    link: 'https://aistudio.google.com/app/apikey',
-    lsKey: 'vorpic_flow_key_gemini',
-    ph: 'AIzaSy…',
-    steps: [
-      'Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" class="wiz-inline-link">aistudio.google.com</a>',
-      'Sign in with a Google account — no credit card required',
-      'Click <strong>Create API key</strong> and select or create a project',
-      'Copy the generated key'
-    ]
-  },
   groq: {
-    name: 'Groq Llama 3',
-    badge: 'Fastest — low latency',
-    desc: 'Groq runs open-source Llama 3 at extremely fast speeds on custom hardware. Free tier provides generous daily limits.',
+    name: 'Groq — Llama 3.3 70B',
+    badge: 'Fast — generous free tier',
+    desc: 'Groq runs open-source Llama 3 at extremely fast speeds on custom hardware. Free tier provides generous daily limits with no credit card required.',
     link: 'https://console.groq.com',
     lsKey: 'vorpic_flow_key_groq',
     ph: 'gsk_…',
@@ -1357,30 +1352,16 @@ const WIZARD_PROVIDERS = {
       'Navigate to <strong>API Keys</strong> in the left sidebar',
       'Click <strong>Create API Key</strong>, name it, and copy it'
     ]
-  },
-  openrouter: {
-    name: 'OpenRouter',
-    badge: 'Most flexible — 50+ free models',
-    desc: 'OpenRouter is a unified API gateway giving access to 50+ AI models through a single key, many available for free.',
-    link: 'https://openrouter.ai/keys',
-    lsKey: 'vorpic_flow_key_openrouter',
-    ph: 'sk-or-…',
-    steps: [
-      'Go to <a href="https://openrouter.ai" target="_blank" class="wiz-inline-link">openrouter.ai</a>',
-      'Sign up for a free account — no credit card required',
-      'Navigate to <strong>Keys</strong> in your account settings',
-      'Click <strong>Create Key</strong> and copy it'
-    ]
   }
 };
 
 let wizStep = 1;
-let wizProvider = 'gemini';
+let wizProvider = 'groq';
 let wizTestPassed = false;
 
 function showWizard() {
   wizStep = 1;
-  wizProvider = localStorage.getItem('vorpic_flow_provider') || 'gemini';
+  wizProvider = 'groq';
   wizTestPassed = false;
   renderWizardStep();
   document.getElementById('overlayWizard').classList.add('open');
@@ -1407,7 +1388,17 @@ function renderWizardStep() {
   if (wizStep === 1) {
     body.innerHTML = `
       <div class="wiz-welcome">
-        <div class="wiz-brandmark">VP</div>
+        <div class="wiz-brandmark">
+          <svg width="28" height="28" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <line x1="24" y1="24" x2="13" y2="13" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="24" y1="24" x2="35" y2="13" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="24" y1="24" x2="24" y2="37" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="13" cy="13" r="3.5" fill="none" stroke="#fff" stroke-width="2"/>
+            <circle cx="35" cy="13" r="3.5" fill="none" stroke="#fff" stroke-width="2"/>
+            <circle cx="24" cy="37" r="3.5" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2"/>
+            <circle cx="24" cy="24" r="5" fill="#fff"/>
+          </svg>
+        </div>
         <div class="wiz-h1">Welcome to Vorpic Flow</div>
         <div class="wiz-sub">Generate professional Standard Operating Procedure documents from raw notes in seconds — powered by free AI providers.</div>
       </div>`;
@@ -1417,17 +1408,16 @@ function renderWizardStep() {
       </div>`;
 
   } else if (wizStep === 2) {
-    const cards = ['gemini', 'groq', 'openrouter'].map(k => {
-      const p = WIZARD_PROVIDERS[k];
-      return `<div class="wiz-card${wizProvider === k ? ' selected' : ''}" onclick="wizSelectProvider('${k}')">
-        <div class="wiz-card-name">${p.name}</div>
-        <span class="wiz-card-badge">${p.badge}</span>
-      </div>`;
-    }).join('');
+    const p = WIZARD_PROVIDERS.groq;
     body.innerHTML = `
-      <div class="wiz-h2">Choose your AI provider</div>
-      <div class="wiz-sub-left">All three are free with a free account key. You can change this later in Settings.</div>
-      <div class="wiz-cards">${cards}</div>`;
+      <div class="wiz-h2">Your AI provider: Groq</div>
+      <div class="wiz-sub-left">Vorpic Flow uses Groq for SOP generation — fast, free, and no credit card required.</div>
+      <div class="wiz-cards">
+        <div class="wiz-card selected" style="flex:unset;width:100%;text-align:left;padding:16px 18px;">
+          <div class="wiz-card-name" style="margin-bottom:6px">${p.name}</div>
+          <span class="wiz-card-badge">${p.badge}</span>
+        </div>
+      </div>`;
     footer.innerHTML = `
       <span class="wiz-skip" onclick="wizSkip()">Skip for now</span>
       <div class="wiz-footer-end">
@@ -1487,7 +1477,7 @@ function renderWizardStep() {
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <div class="wiz-h1">You're all set!</div>
-        <div class="wiz-sub">Vorpic Flow is ready. Start by pasting your notes or a rough draft into the SOP Generator.</div>
+        <div class="wiz-sub">Vorpic Flow is ready. Switch to the Create tab, paste your notes, and click Generate SOP.</div>
       </div>`;
     footer.innerHTML = `
       <div class="wiz-footer-center">
@@ -1573,36 +1563,14 @@ async function wizTestConnection() {
 async function callProviderTest(provider, key) {
   let res;
   try {
-    if (provider === 'gemini') {
-      res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${encodeURIComponent(key)}`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-goog-api-client': 'genai-js/0.21.0' },
-        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'test' }] }], generationConfig: { maxOutputTokens: 1 } })
-      });
-    } else if (provider === 'groq') {
-      res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'authorization': `Bearer ${key}` },
-        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: 'test' }], max_tokens: 1 })
-      });
-    } else if (provider === 'openrouter') {
-      res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'authorization': `Bearer ${key}`,
-          'HTTP-Referer': location.origin,
-          'X-Title': 'Vorpic Flow',
-          'X-Data-Policy': 'allow-training'
-        },
-        body: JSON.stringify({ model: 'meta-llama/llama-3.3-70b-instruct:free', messages: [{ role: 'user', content: 'test' }], max_tokens: 1, transforms: ['middle-out'] })
-      });
-    }
+    res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'authorization': `Bearer ${key}` },
+      body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: 'test' }], max_tokens: 1 })
+    });
   } catch {
     throw new Error('NETWORK_ERROR');
   }
-  // 401/403 = key explicitly rejected; anything else (200, 400, 422, 500) means the API
-  // is reachable and the key was accepted at the auth layer
   if (res.status === 401 || res.status === 403) throw new Error('KEY_REJECTED');
 }
 
