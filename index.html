@@ -520,6 +520,34 @@
     .btn-wiz:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .btn-block { width: 100%; display: flex; justify-content: center; }
+
+    /* ── PRINT / PDF EXPORT ─────────────────────────────────────────── */
+    @media print {
+      * { box-sizing: border-box; }
+      body { background: #fff !important; color: #1a1d26 !important; margin: 0; padding: 0; }
+      .setup-banner, .app-header, .sidebar, .input-panel, .output-toolbar,
+      .wiz-modal, dialog, .toast-container { display: none !important; }
+      .content { display: block !important; height: auto !important; overflow: visible !important; }
+      .output-panel {
+        display: block !important; width: 100% !important; height: auto !important;
+        overflow: visible !important; border: none !important; padding: 0 !important;
+      }
+      .output-body { overflow: visible !important; height: auto !important; padding: 24px 32px !important; }
+      #sopDoc { display: block !important; }
+      #genEmpty, #genLoading { display: none !important; }
+      .sop-meta { display: flex !important; }
+
+      /* Print footer */
+      @page { margin: 20mm 18mm; }
+      #printFooter { display: block !important; }
+    }
+    #printFooter {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      font-family: system-ui, sans-serif; font-size: 10px; color: #9499a8;
+      border-top: 1px solid #dde0e9; padding: 6px 32px;
+      justify-content: space-between;
+    }
   </style>
 </head>
 <body>
@@ -631,6 +659,10 @@
           <button class="btn-action hidden" id="btnPrint" onclick="handlePrint()">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             Print
+          </button>
+          <button class="btn-action hidden" id="btnDownload" onclick="handleDownload()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
           </button>
         </div>
         <div class="output-body" id="outputBody">
@@ -950,7 +982,7 @@ async function generateSOP(userMsg) {
 async function callGemini(userMsg) {
   const key = localStorage.getItem('vorpic_flow_key_gemini') || '';
   if (!key) throw new Error('MISSING_KEY');
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(key)}`, {
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${encodeURIComponent(key)}`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
@@ -997,7 +1029,7 @@ async function callOpenRouter(userMsg) {
       'X-Title': 'Vorpic Flow'
     },
     body: JSON.stringify({
-      model: 'meta-llama/llama-3.2-3b-instruct:free',
+      model: 'mistralai/mistral-7b-instruct:free',
       messages: [{ role: 'system', content: AI_SYSTEM_PROMPT }, { role: 'user', content: userMsg }]
     })
   });
@@ -1100,7 +1132,7 @@ function parseSections(text) {
 }
 
 function showOutputActions() {
-  ['btnSave', 'btnCopy', 'btnPrint'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+  ['btnSave', 'btnCopy', 'btnPrint', 'btnDownload'].forEach(id => document.getElementById(id).classList.remove('hidden'));
 }
 
 /* =====================================================================
@@ -1539,7 +1571,7 @@ async function callProviderTest(provider, key) {
   let res;
   try {
     if (provider === 'gemini') {
-      res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(key)}`, {
+      res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${encodeURIComponent(key)}`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'test' }] }] })
@@ -1559,7 +1591,7 @@ async function callProviderTest(provider, key) {
           'HTTP-Referer': location.origin,
           'X-Title': 'Vorpic Flow'
         },
-        body: JSON.stringify({ model: 'meta-llama/llama-3.2-3b-instruct:free', messages: [{ role: 'user', content: 'test' }], max_tokens: 1 })
+        body: JSON.stringify({ model: 'mistralai/mistral-7b-instruct:free', messages: [{ role: 'user', content: 'test' }], max_tokens: 1 })
       });
     }
   } catch {
@@ -1604,6 +1636,22 @@ function fmtDate(d) {
   const dt = d instanceof Date ? d : new Date(d);
   return isNaN(dt) ? '—' : dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
+
+/* =====================================================================
+   DOWNLOAD (PRINT-TO-PDF)
+   ===================================================================== */
+function handleDownload() {
+  const title = document.getElementById('sopTitleInput').value.trim() || 'SOP';
+  document.title = title;
+  const footer = document.getElementById('printFooter');
+  const today  = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  footer.innerHTML = `<span>Generated by Vorpic Flow — Hagans Consulting</span><span>${esc(today)}</span>`;
+  footer.style.display = 'flex';
+  window.print();
+  footer.style.display = 'none';
+  document.title = 'Vorpic Flow';
+}
 </script>
+<div id="printFooter"></div>
 </body>
 </html>
