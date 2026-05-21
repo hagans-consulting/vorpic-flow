@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vorpic Flow — Knowledge Base &amp; SOP Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- STYLES -->
+  <style>
+    :root {
+      --bg:         #0e0f11;
+      --bg2:        #16181c;
+      --bg3:        #1e2026;
+      --border:     #2a2d35;
+      --border2:    #363a45;
+      --text:       #e8eaf0;
+      --text2:      #9499a8;
+      --text3:      #5a5f70;
+      --accent:     #00e5a0;
+      --accent2:    #00b87a;
+      --accent-dim: rgba(0,229,160,0.10);
+      --amber:      #f5a623;
+      --red:        #ff4d4d;
+      --blue:       #4da6ff;
+      --purple:     #a78bfa;
+      --radius:     6px;
+      --radius-lg:  10px;
+      --shadow:     0 2px 8px rgba(0,0,0,0.4);
+      --shadow-lg:  0 8px 32px rgba(0,0,0,0.6);
+      --font:       'IBM Plex Sans', system-ui, sans-serif;
+      --mono:       'IBM Plex Mono', monospace;
+    }
+    [data-theme="light"] {
+      --bg:      #f4f5f7;
+      --bg2:     #ffffff;
+      --bg3:     #ebedf2;
+      --border:  #dde0e9;
+      --border2: #c9cdd9;
+      --text:    #1a1d26;
+      --text2:   #5a5f70;
+      --text3:   #9499a8;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.6; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: var(--font); }
+    .hidden { display: none !important; }
+    .text-muted { color: var(--text2); }
+    .text-dim   { color: var(--text3); }
+
+    /* ── HEADER ── */
+    .hdr {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; gap: 12px;
+      height: 56px; padding: 0 24px;
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .brandmark {
+      width: 32px; height: 32px; border-radius: 6px; flex-shrink: 0;
+      background: var(--accent); display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-weight: 500; font-size: 13px;
+      color: #0e0f11; letter-spacing: -0.5px;
+    }
+    .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
+    .brand-name { font-size: 15px; font-weight: 600; color: var(--text); }
+    .brand-sub  { font-size: 11px; color: var(--text3); }
+    .hdr-sep    { width: 1px; height: 28px; background: var(--border); margin: 0 4px; }
+    .btn-home {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: var(--radius);
+      border: 1px solid var(--border); background: transparent;
+      color: var(--text2); font-size: 13px; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-home:hover { background: var(--bg3); border-color: var(--border2); color: var(--text); }
+    .hdr-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .btn-icon {
+      width: 34px; height: 34px; border-radius: var(--radius);
+      border: 1px solid var(--border); background: transparent;
+      color: var(--text2); display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-icon:hover { background: var(--bg3); border-color: var(--border2); color: var(--text); }
+
+    /* ── TABS ── */
+    .tabs-nav {
+      display: flex; background: var(--bg2); border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+    }
+    .tab-btn {
+      padding: 12px 18px; background: none; border: none;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      color: var(--text2); font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ── LAYOUT ── */
+    .content { height: calc(100vh - 99px); overflow: hidden; }
+    .tab-pane { display: none; height: 100%; flex-direction: column; }
+    .tab-pane.active { display: flex; }
+    #pane-generator { flex-direction: row !important; }
+
+    /* ── GENERATOR GRID ── */
+    .gen-grid { display: grid; grid-template-columns: 360px 1fr; height: 100%; overflow: hidden; }
+
+    /* ── INPUT PANEL ── */
+    .input-panel {
+      display: flex; flex-direction: column; overflow: hidden;
+      background: var(--bg2); border-right: 1px solid var(--border);
+    }
+    .panel-hdr {
+      padding: 13px 18px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--text3);
+    }
+    .panel-body {
+      flex: 1; overflow-y: auto; padding: 18px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .panel-footer { padding: 14px 18px; border-top: 1px solid var(--border); flex-shrink: 0; }
+
+    .form-grp         { display: flex; flex-direction: column; gap: 5px; }
+    .form-grp-stretch { flex: 1; display: flex; flex-direction: column; }
+    .form-grp-stretch .textarea-raw { flex: 1; min-height: 160px; }
+    .form-lbl { font-size: 12px; font-weight: 500; color: var(--text2); }
+
+    .textarea-raw {
+      width: 100%; resize: vertical;
+      background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 12px; color: var(--text); font-family: var(--mono); font-size: 13px;
+      outline: none; transition: border-color 0.15s; line-height: 1.6;
+    }
+    .textarea-raw::placeholder { color: var(--text3); }
+    .textarea-raw:focus { border-color: var(--accent); }
+
+    .file-drop {
+      display: flex; align-items: center; gap: 8px; width: 100%;
+      padding: 9px 12px; background: var(--bg3);
+      border: 1px dashed var(--border2); border-radius: var(--radius);
+      color: var(--text2); font-size: 13px; cursor: pointer; transition: all 0.15s;
+    }
+    .file-drop:hover { border-color: var(--accent); color: var(--accent); }
+    .file-drop input[type="file"] { display: none; }
+
+    .file-chip {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px; border-radius: var(--radius);
+      background: var(--accent-dim); border: 1px solid var(--accent);
+      color: var(--accent); font-size: 13px;
+    }
+    .file-chip-rm { margin-left: auto; cursor: pointer; opacity: 0.7; line-height: 0; }
+    .file-chip-rm:hover { opacity: 1; }
+
+    .form-select {
+      width: 100%; padding: 8px 32px 8px 12px;
+      background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
+      color: var(--text); font-family: var(--font); font-size: 13px;
+      outline: none; cursor: pointer; transition: border-color 0.15s; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a5f70' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+    }
+    .form-select:focus { border-color: var(--accent); }
+    .form-select-sm { width: 160px; }
+
+    .btn-gen {
+      width: 100%; padding: 11px; background: var(--accent); border: none;
+      border-radius: var(--radius); color: #0e0f11;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background 0.15s;
+    }
+    .btn-gen:hover:not(:disabled) { background: var(--accent2); }
+    .btn-gen:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── OUTPUT PANEL ── */
+    .output-panel { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+    .output-toolbar {
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+      padding: 10px 20px; background: var(--bg2); border-bottom: 1px solid var(--border);
+    }
+    .output-title-wrap { flex: 1; }
+    .output-title {
+      width: 100%; background: none; border: none; outline: none;
+      color: var(--text); font-family: var(--font); font-size: 15px; font-weight: 600;
+    }
+    .output-title::placeholder { color: var(--text3); }
+    .output-title[readonly] { cursor: default; }
+    .output-body { flex: 1; overflow-y: auto; padding: 36px 44px; }
+
+    .btn-action {
+      display: flex; align-items: center; gap: 5px;
+      padding: 6px 13px; border-radius: var(--radius);
+      border: 1px solid var(--border); background: var(--bg3);
+      color: var(--text2); font-size: 12px; font-weight: 500; cursor: pointer;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .btn-action:hover { border-color: var(--border2); color: var(--text); }
+    .btn-action.prim { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+    .btn-action.prim:hover { background: var(--accent); color: #0e0f11; }
+
+    /* ── EMPTY STATE ── */
+    .empty {
+      height: 100%; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 14px;
+      text-align: center;
+    }
+    .empty-icon {
+      width: 60px; height: 60px; border-radius: 14px;
+      background: var(--bg3); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center; color: var(--text3);
+    }
+    .empty-title { font-size: 15px; font-weight: 600; color: var(--text2); }
+    .empty-desc  { font-size: 13px; color: var(--text3); max-width: 300px; line-height: 1.65; }
+
+    /* ── SOP DOCUMENT ── */
+    .sop-doc { max-width: 760px; margin: 0 auto; outline: none; }
+    .sop-doc h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+    .sop-meta {
+      display: flex; align-items: center; gap: 12px;
+      padding-bottom: 20px; margin-bottom: 28px; border-bottom: 1px solid var(--border);
+    }
+    .sop-badge {
+      display: inline-flex; align-items: center;
+      padding: 3px 10px; border-radius: 20px;
+      background: var(--accent-dim); border: 1px solid var(--accent);
+      color: var(--accent); font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .sop-date { font-size: 12px; color: var(--text3); }
+    .sop-section { margin-bottom: 22px; }
+    .sop-section-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.09em; color: var(--accent); margin-bottom: 8px;
+    }
+    .sop-section-body { font-size: 14px; color: var(--text); line-height: 1.75; }
+    .sop-section-body ol { padding-left: 20px; }
+    .sop-section-body li { margin-bottom: 5px; }
+    .sop-section-body p  { margin-bottom: 8px; }
+
+    /* ── LIBRARY ── */
+    .lib-toolbar {
+      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+      padding: 14px 24px; background: var(--bg2); border-bottom: 1px solid var(--border);
+    }
+    .search-wrap { position: relative; width: 280px; }
+    .search-icon {
+      position: absolute; left: 10px; top: 50%;
+      transform: translateY(-50%); color: var(--text3); pointer-events: none;
+    }
+    .search-input {
+      width: 100%; padding: 7px 12px 7px 34px;
+      background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
+      color: var(--text); font-family: var(--font); font-size: 13px;
+      outline: none; transition: border-color 0.15s;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .lib-body { flex: 1; overflow-y: auto; padding: 24px; }
+
+    .sop-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .sop-table th {
+      text-align: left; padding: 9px 14px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--text3);
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+    }
+    .sop-table td { padding: 13px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .sop-table tbody tr:hover td { background: var(--bg2); }
+    .sop-table tbody tr:last-child td { border-bottom: none; }
+
+    .cat-pill {
+      display: inline-flex; padding: 2px 9px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+      background: var(--bg3); border: 1px solid var(--border); color: var(--text2);
+    }
+    .row-actions { display: flex; gap: 6px; }
+    .btn-row {
+      padding: 5px 10px; border-radius: var(--radius);
+      border: 1px solid var(--border); background: transparent;
+      color: var(--text2); font-family: var(--font); font-size: 12px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-row:hover        { border-color: var(--border2); color: var(--text); background: var(--bg3); }
+    .btn-row.danger:hover { border-color: var(--red); color: var(--red); background: rgba(255,77,77,0.08); }
+
+    /* ── MODALS ── */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7); z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    .overlay.open { display: flex; }
+    .modal {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg); width: 480px;
+      max-width: calc(100vw - 32px); max-height: calc(100vh - 64px); overflow-y: auto;
+    }
+    .modal-sm { width: 400px; }
+    .modal-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 22px 14px; border-bottom: 1px solid var(--border);
+    }
+    .modal-title { font-size: 16px; font-weight: 600; }
+    .modal-body  { padding: 22px; display: flex; flex-direction: column; gap: 22px; }
+    .modal-footer {
+      display: flex; justify-content: flex-end; gap: 8px;
+      padding: 14px 22px; border-top: 1px solid var(--border);
+    }
+
+    .settings-sec { display: flex; flex-direction: column; gap: 10px; }
+    .settings-sec-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--text3);
+    }
+    .form-input {
+      width: 100%; padding: 8px 12px;
+      background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
+      color: var(--text); font-family: var(--mono); font-size: 13px;
+      outline: none; transition: border-color 0.15s;
+    }
+    .form-input:focus { border-color: var(--accent); }
+    .field-hint { font-size: 11px; color: var(--text3); }
+
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .toggle-lbl { font-size: 13px; color: var(--text); }
+    .toggle-sub { font-size: 12px; color: var(--text3); }
+    .toggle {
+      width: 36px; height: 20px; border-radius: 20px;
+      background: var(--bg3); border: 1px solid var(--border);
+      cursor: pointer; position: relative; transition: all 0.2s; flex-shrink: 0;
+    }
+    .toggle::after {
+      content: ''; position: absolute;
+      width: 14px; height: 14px; top: 2px; left: 2px;
+      background: var(--text3); border-radius: 50%; transition: all 0.2s;
+    }
+    .toggle.on { background: var(--accent); border-color: var(--accent); }
+    .toggle.on::after { left: 18px; background: #0e0f11; }
+
+    .settings-link {
+      display: flex; align-items: center; gap: 8px; padding: 9px 12px;
+      background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
+      color: var(--text); font-size: 13px; transition: all 0.15s;
+    }
+    .settings-link:hover { border-color: var(--border2); }
+    .settings-link-arrow { margin-left: auto; color: var(--text3); }
+
+    .about-mono {
+      padding: 10px 12px; background: var(--bg3);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      font-family: var(--mono); font-size: 12px; color: var(--text3);
+    }
+
+    .btn {
+      padding: 8px 16px; border-radius: var(--radius);
+      border: 1px solid var(--border); background: var(--bg3);
+      color: var(--text); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s;
+    }
+    .btn:hover { border-color: var(--border2); }
+    .btn.accent { background: var(--accent); border-color: var(--accent); color: #0e0f11; }
+    .btn.accent:hover { background: var(--accent2); border-color: var(--accent2); }
+
+    /* ── QUOTA MODAL ── */
+    .quota-body { padding: 32px 22px; text-align: center; display: flex; flex-direction: column; gap: 0; }
+    .quota-icon {
+      width: 48px; height: 48px; border-radius: 12px; margin: 0 auto 16px;
+      background: rgba(245,166,35,0.12); border: 1px solid var(--amber);
+      display: flex; align-items: center; justify-content: center; color: var(--amber);
+    }
+    .quota-h { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .quota-p { font-size: 13px; color: var(--text2); line-height: 1.65; }
+
+    /* ── SPINNER ── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin {
+      width: 15px; height: 15px; border-radius: 50%; flex-shrink: 0;
+      border: 2px solid rgba(14,15,17,0.3); border-top-color: #0e0f11;
+      animation: spin 0.65s linear infinite;
+    }
+
+    /* ── TOASTS ── */
+    #toasts { position: fixed; bottom: 22px; right: 22px; z-index: 300; display: flex; flex-direction: column; gap: 7px; }
+    .toast {
+      padding: 9px 15px; background: var(--bg3);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      color: var(--text); font-size: 13px; box-shadow: var(--shadow);
+      animation: toast-in 0.18s ease;
+    }
+    .toast.ok  { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+    .toast.err { background: rgba(255,77,77,0.08); border-color: var(--red); color: var(--red); }
+    @keyframes toast-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <a href="https://hagans-consulting.github.io/vorpic-homedeck/" class="brand">
+    <div class="brandmark">VP</div>
+    <div class="brand-text">
+      <span class="brand-name">Flow</span>
+      <span class="brand-sub">Knowledge Base &amp; SOP Generator</span>
+    </div>
+  </a>
+  <div class="hdr-sep"></div>
+  <a href="https://hagans-consulting.github.io/vorpic-homedeck/" class="btn-home">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Home
+  </a>
+  <div class="hdr-right">
+    <button class="btn-icon" onclick="openSettings()" title="Settings">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- TABS NAV -->
+<nav class="tabs-nav">
+  <button class="tab-btn active" id="tbtn-generator" onclick="switchTab('generator')">SOP Generator</button>
+  <button class="tab-btn"        id="tbtn-library"   onclick="switchTab('library')">Document Library</button>
+</nav>
+
+<!-- CONTENT -->
+<main class="content">
+
+  <!-- ── SOP GENERATOR ── -->
+  <div class="tab-pane active" id="pane-generator">
+    <div class="gen-grid">
+
+      <!-- LEFT: INPUT -->
+      <aside class="input-panel">
+        <div class="panel-hdr">Input</div>
+        <div class="panel-body">
+
+          <div class="form-grp form-grp-stretch">
+            <label class="form-lbl" for="rawInput">Raw Notes or Draft</label>
+            <textarea id="rawInput" class="textarea-raw" placeholder="Paste notes, bullet points, or a rough draft..."></textarea>
+          </div>
+
+          <div class="form-grp">
+            <label class="form-lbl">Source Document <span class="text-dim">(optional)</span></label>
+            <label class="file-drop" id="fileDropLabel">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload source document (.txt, .md)
+              <input type="file" id="fileInput" accept=".txt,.md" onchange="handleFile(event)">
+            </label>
+            <div class="file-chip hidden" id="fileChip">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              <span id="fileChipName"></span>
+              <span class="file-chip-rm" onclick="removeFile()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </span>
+            </div>
+          </div>
+
+          <div class="form-grp">
+            <label class="form-lbl" for="sopCat">SOP Category</label>
+            <select id="sopCat" class="form-select">
+              <option value="General">General</option>
+              <option value="HR">HR</option>
+              <option value="IT">IT</option>
+              <option value="Operations">Operations</option>
+              <option value="Safety">Safety</option>
+              <option value="Finance">Finance</option>
+              <option value="Custom">Custom</option>
+            </select>
+          </div>
+
+        </div>
+        <div class="panel-footer">
+          <button class="btn-gen" id="genBtn" onclick="handleGenerate()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+            Generate SOP
+          </button>
+        </div>
+      </aside>
+
+      <!-- RIGHT: OUTPUT -->
+      <section class="output-panel">
+        <div class="output-toolbar">
+          <div class="output-title-wrap">
+            <input type="text" id="sopTitleInput" class="output-title" placeholder="SOP title will appear here…" readonly>
+          </div>
+          <button class="btn-action prim hidden" id="btnSave"  onclick="handleSave()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+            Save
+          </button>
+          <button class="btn-action hidden" id="btnCopy"  onclick="handleCopy()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+          </button>
+          <button class="btn-action hidden" id="btnPrint" onclick="handlePrint()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Print
+          </button>
+        </div>
+        <div class="output-body" id="outputBody">
+          <div class="empty" id="genEmpty">
+            <div class="empty-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div class="empty-title">No SOP generated yet</div>
+            <div class="empty-desc">Paste your notes or rough draft in the input panel, then click Generate SOP to produce a professional document.</div>
+          </div>
+          <div class="sop-doc hidden" id="sopDoc" contenteditable="true" spellcheck="true"></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ── DOCUMENT LIBRARY ── -->
+  <div class="tab-pane" id="pane-library">
+    <div class="lib-toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <input type="text" id="libSearch" class="search-input" placeholder="Search documents…" oninput="renderLibrary()">
+      </div>
+      <select id="libCat" class="form-select form-select-sm" onchange="renderLibrary()">
+        <option value="">All Categories</option>
+        <option value="General">General</option>
+        <option value="HR">HR</option>
+        <option value="IT">IT</option>
+        <option value="Operations">Operations</option>
+        <option value="Safety">Safety</option>
+        <option value="Finance">Finance</option>
+        <option value="Custom">Custom</option>
+      </select>
+    </div>
+    <div class="lib-body" id="libBody"></div>
+  </div>
+
+</main>
+
+<!-- SETTINGS MODAL -->
+<div class="overlay" id="overlaySettings">
+  <div class="modal">
+    <div class="modal-hdr">
+      <span class="modal-title">Settings</span>
+      <button class="btn-icon" onclick="closeSettings()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <div class="settings-sec">
+        <div class="settings-sec-title">Anthropic API</div>
+        <div class="form-grp">
+          <label class="form-lbl" for="apiKeyField">API Key</label>
+          <input type="password" id="apiKeyField" class="form-input" placeholder="sk-ant-api03-…">
+          <span class="field-hint">Stored in your browser only. Never sent anywhere other than api.anthropic.com.</span>
+        </div>
+      </div>
+
+      <div class="settings-sec">
+        <div class="settings-sec-title">Navigation</div>
+        <a href="https://hagans-consulting.github.io/vorpic-homedeck/" class="settings-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Vorpic HomeDeck
+          <svg class="settings-link-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <div class="settings-sec">
+        <div class="settings-sec-title">Appearance</div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-lbl">Dark Mode</div>
+            <div class="toggle-sub">Use dark theme</div>
+          </div>
+          <div class="toggle on" id="darkToggle" onclick="toggleDark()"></div>
+        </div>
+      </div>
+
+      <div class="settings-sec">
+        <div class="settings-sec-title">About</div>
+        <div class="about-mono">Vorpic Flow — v0.1 beta · Hagans Consulting</div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeSettings()">Cancel</button>
+      <button class="btn accent" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUOTA MODAL -->
+<div class="overlay" id="overlayQuota">
+  <div class="modal modal-sm">
+    <div class="quota-body">
+      <div class="quota-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div class="quota-h">Storage limit reached</div>
+      <div class="quota-p">This is a beta limitation — the production version will include unlimited cloud storage. Try deleting older documents to free up space.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn accent" onclick="closeQuota()">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div id="toasts"></div>
+
+<!-- SCRIPT -->
+<script>
+/* =====================================================================
+   SOPSTORAGESERVICE — IndexedDB abstraction
+   ===================================================================== */
+const SOPStorageService = (() => {
+  const DB_NAME = 'vorpic_flow_db';
+  const DB_VER  = 1;
+  const STORE   = 'sops';
+  let _db = null;
+
+  function openDB() {
+    return new Promise((res, rej) => {
+      if (_db) { res(_db); return; }
+      const req = indexedDB.open(DB_NAME, DB_VER);
+      req.onupgradeneeded = e => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE)) {
+          const s = db.createObjectStore(STORE, { keyPath: 'id' });
+          s.createIndex('category',   'category',   { unique: false });
+          s.createIndex('updated_at', 'updated_at', { unique: false });
+        }
+      };
+      req.onsuccess = e => { _db = e.target.result; res(_db); };
+      req.onerror   = e => rej(e.target.error);
+    });
+  }
+
+  async function saveSOP(sop) {
+    try {
+      const db = await openDB();
+      return await new Promise((res, rej) => {
+        const tx  = db.transaction(STORE, 'readwrite');
+        const req = tx.objectStore(STORE).put(sop);
+        req.onsuccess = () => res(sop);
+        req.onerror = e => {
+          if (e.target.error?.name === 'QuotaExceededError') showQuota();
+          rej(e.target.error);
+        };
+        tx.onerror = e => {
+          if (e.target.error?.name === 'QuotaExceededError') showQuota();
+          rej(e.target.error);
+        };
+      });
+    } catch (err) {
+      showQuota(); // any write failure shows the friendly modal
+      throw err;
+    }
+  }
+
+  async function getSOP(id) {
+    const db = await openDB();
+    return new Promise((res, rej) => {
+      const req = db.transaction(STORE, 'readonly').objectStore(STORE).get(id);
+      req.onsuccess = e => res(e.target.result ?? null);
+      req.onerror   = e => rej(e.target.error);
+    });
+  }
+
+  async function getAllSOPs() {
+    try {
+      const db = await openDB();
+      return await new Promise((res, rej) => {
+        const req = db.transaction(STORE, 'readonly').objectStore(STORE).getAll();
+        req.onsuccess = e => res(e.target.result ?? []);
+        req.onerror   = e => rej(e.target.error);
+      });
+    } catch { return []; }
+  }
+
+  async function deleteSOP(id) {
+    const db = await openDB();
+    return new Promise((res, rej) => {
+      const req = db.transaction(STORE, 'readwrite').objectStore(STORE).delete(id);
+      req.onsuccess = () => res();
+      req.onerror   = e => rej(e.target.error);
+    });
+  }
+
+  return { saveSOP, getSOP, getAllSOPs, deleteSOP };
+})();
+
+/* =====================================================================
+   APP STATE
+   ===================================================================== */
+let darkMode       = true;
+let currentSOPRaw  = '';    // raw AI text of the active SOP
+let currentSOPMeta = null;  // { id, title, category, created_at, ... } if loaded from library
+let attachedFile   = null;  // { name, text }
+
+/* =====================================================================
+   INIT
+   ===================================================================== */
+(async () => {
+  darkMode = localStorage.getItem('vf-dark') !== 'false';
+  applyTheme();
+  document.getElementById('apiKeyField').value = localStorage.getItem('vorpic_flow_api_key') || '';
+  await renderLibrary();
+})();
+
+/* =====================================================================
+   THEME
+   ===================================================================== */
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+  document.getElementById('darkToggle').classList.toggle('on', darkMode);
+}
+
+function toggleDark() {
+  darkMode = !darkMode;
+  applyTheme();
+}
+
+/* =====================================================================
+   TABS
+   ===================================================================== */
+function switchTab(name) {
+  ['generator', 'library'].forEach(t => {
+    document.getElementById('pane-'  + t).classList.toggle('active', t === name);
+    document.getElementById('tbtn-' + t).classList.toggle('active', t === name);
+  });
+  if (name === 'library') renderLibrary();
+}
+
+/* =====================================================================
+   FILE UPLOAD
+   ===================================================================== */
+function handleFile(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    attachedFile = { name: f.name, text: ev.target.result };
+    document.getElementById('fileDropLabel').classList.add('hidden');
+    document.getElementById('fileChip').classList.remove('hidden');
+    document.getElementById('fileChipName').textContent = f.name;
+  };
+  reader.readAsText(f);
+}
+
+function removeFile() {
+  attachedFile = null;
+  document.getElementById('fileInput').value = '';
+  document.getElementById('fileChip').classList.add('hidden');
+  document.getElementById('fileDropLabel').classList.remove('hidden');
+}
+
+/* =====================================================================
+   SOP GENERATION — Anthropic API
+   ===================================================================== */
+const SYSTEM_PROMPT = `You are a professional SOP (Standard Operating Procedure) writer for business operations. Convert the user's raw input into a clean, professional SOP document.
+
+Format the output with these exact section headers in this order, using bold markdown (**Header**):
+
+**Purpose**
+A concise statement of why this SOP exists and what outcome it ensures.
+
+**Scope**
+Who this SOP applies to and what activities, systems, or departments it covers.
+
+**Responsibilities**
+Who is responsible for following this SOP and who owns and maintains it.
+
+**Procedure**
+Step-by-step numbered instructions. Each step must be a complete, actionable sentence.
+
+**Notes**
+Additional context, exceptions, edge cases, version references, or important reminders.
+
+Rules: Use active voice. Professional tone. No sections beyond these five. Procedure must use a numbered list.`;
+
+async function handleGenerate() {
+  const raw    = document.getElementById('rawInput').value.trim();
+  const apiKey = localStorage.getItem('vorpic_flow_api_key') || '';
+
+  if (!raw && !attachedFile) { toast('Enter some notes or upload a document first.', 'err'); return; }
+  if (!apiKey)               { toast('Add your Anthropic API key in Settings first.', 'err'); openSettings(); return; }
+
+  const category = document.getElementById('sopCat').value;
+  let userMsg = raw;
+  if (attachedFile) userMsg += (userMsg ? '\n\n---\nAttached document:\n' : 'Document content:\n') + attachedFile.text;
+  if (category !== 'General') userMsg = `[SOP Category: ${category}]\n\n` + userMsg;
+
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Generating…';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model:      'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system:     SYSTEM_PROMPT,
+        messages:   [{ role: 'user', content: userMsg }]
+      })
+    });
+
+    if (!res.ok) {
+      const j = await res.json().catch(() => ({}));
+      throw new Error(j.error?.message || `API error ${res.status}`);
+    }
+
+    const data = await res.json();
+    currentSOPRaw  = data.content?.[0]?.text || '';
+    currentSOPMeta = null;
+
+    const firstLine = raw.split('\n')[0].trim().replace(/^[#*\->|\s]+/, '');
+    const autoTitle = firstLine.length > 4 ? firstLine.slice(0, 64) : `${category} SOP`;
+
+    const titleEl = document.getElementById('sopTitleInput');
+    titleEl.value = autoTitle;
+    titleEl.removeAttribute('readonly');
+
+    renderSOPDoc(autoTitle, category, currentSOPRaw, new Date());
+    showOutputActions();
+    toast('SOP generated.', 'ok');
+
+  } catch (err) {
+    toast('Generation failed: ' + err.message, 'err');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> Generate SOP';
+  }
+}
+
+/* =====================================================================
+   SOP DOCUMENT RENDERER
+   ===================================================================== */
+const SOP_SECTIONS = ['Purpose', 'Scope', 'Responsibilities', 'Procedure', 'Notes'];
+
+function renderSOPDoc(title, category, raw, date) {
+  const parsed = parseSections(raw);
+
+  let h = `<h1>${esc(title)}</h1>`;
+  h += `<div class="sop-meta"><span class="sop-badge">${esc(category)}</span><span class="sop-date">${fmtDate(date)}</span></div>`;
+
+  SOP_SECTIONS.forEach(sec => {
+    const body = parsed[sec];
+    if (!body) return;
+    h += `<div class="sop-section"><div class="sop-section-title">${esc(sec)}</div><div class="sop-section-body">`;
+    if (sec === 'Procedure') {
+      h += '<ol>';
+      body.split('\n').forEach(ln => {
+        const s = ln.replace(/^\d+[.)]\s*/, '').trim();
+        if (s) h += `<li>${esc(s)}</li>`;
+      });
+      h += '</ol>';
+    } else {
+      body.split('\n\n').forEach(p => { const t = p.trim(); if (t) h += `<p>${esc(t)}</p>`; });
+    }
+    h += '</div></div>';
+  });
+
+  document.getElementById('sopDoc').innerHTML = h;
+  document.getElementById('sopDoc').classList.remove('hidden');
+  document.getElementById('genEmpty').classList.add('hidden');
+}
+
+function parseSections(text) {
+  const out = {};
+  const re  = /\*\*([^*]+)\*\*\s*\n([\s\S]*?)(?=\n\*\*[^*]+\*\*|$)/g;
+  let m;
+  while ((m = re.exec(text)) !== null) out[m[1].trim()] = m[2].trim();
+  return out;
+}
+
+function showOutputActions() {
+  ['btnSave', 'btnCopy', 'btnPrint'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+}
+
+/* =====================================================================
+   SAVE / COPY / PRINT
+   ===================================================================== */
+async function handleSave() {
+  if (!currentSOPRaw) return;
+  const title    = document.getElementById('sopTitleInput').value.trim() || 'Untitled SOP';
+  const category = document.getElementById('sopCat').value;
+  const now      = new Date().toISOString();
+
+  const record = currentSOPMeta
+    ? { ...currentSOPMeta, title, category, content: currentSOPRaw, updated_at: now }
+    : { id: crypto.randomUUID(), title, category, content: currentSOPRaw, created_at: now, updated_at: now, owner_id: null };
+
+  try {
+    await SOPStorageService.saveSOP(record);
+    currentSOPMeta = record;
+    toast('Saved to Document Library.', 'ok');
+  } catch { /* quota modal shown by service */ }
+}
+
+async function handleCopy() {
+  try {
+    await navigator.clipboard.writeText(document.getElementById('sopDoc').innerText);
+    toast('Copied to clipboard.', 'ok');
+  } catch { toast('Copy failed — select and copy manually.', 'err'); }
+}
+
+function handlePrint() {
+  const title   = esc(document.getElementById('sopTitleInput').value.trim() || 'SOP');
+  const content = document.getElementById('sopDoc').innerHTML;
+  const w = window.open('about:blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>${title}</title><style>
+    body{font-family:system-ui,sans-serif;max-width:760px;margin:40px auto;color:#1a1d26;line-height:1.7;font-size:14px;}
+    h1{font-size:22px;font-weight:700;margin-bottom:8px;}
+    .sop-meta{display:flex;align-items:center;gap:12px;padding-bottom:18px;margin-bottom:24px;border-bottom:1px solid #dde0e9;}
+    .sop-badge{padding:2px 10px;border-radius:20px;background:#e0faf4;border:1px solid #00b87a;color:#007a55;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+    .sop-date{font-size:12px;color:#9499a8;}
+    .sop-section{margin-bottom:20px;}
+    .sop-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#00875a;margin-bottom:6px;}
+    .sop-section-body{font-size:14px;line-height:1.75;}
+    ol{padding-left:20px;}li{margin-bottom:5px;}p{margin-bottom:8px;}
+  </style></head><body>${content}</body></html>`);
+  w.document.close();
+  w.print();
+}
+
+/* =====================================================================
+   DOCUMENT LIBRARY
+   ===================================================================== */
+async function renderLibrary() {
+  const sops = await SOPStorageService.getAllSOPs();
+  const q    = (document.getElementById('libSearch')?.value || '').toLowerCase();
+  const cat  = document.getElementById('libCat')?.value || '';
+
+  const filtered = sops
+    .filter(s =>
+      (!q   || s.title.toLowerCase().includes(q) || (s.content || '').toLowerCase().includes(q)) &&
+      (!cat || s.category === cat)
+    )
+    .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+
+  const el = document.getElementById('libBody');
+  if (!el) return;
+
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty">
+      <div class="empty-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div class="empty-title">${sops.length ? 'No matching documents' : 'No documents yet'}</div>
+      <div class="empty-desc">${sops.length ? 'Try adjusting your search or filter.' : 'Generate your first SOP and save it to build your library.'}</div>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = `<table class="sop-table">
+    <thead><tr><th>Title</th><th>Category</th><th>Created</th><th>Last Updated</th><th>Actions</th></tr></thead>
+    <tbody>${filtered.map(s => `<tr>
+      <td><strong>${esc(s.title)}</strong></td>
+      <td><span class="cat-pill">${esc(s.category)}</span></td>
+      <td class="text-muted">${fmtDate(s.created_at)}</td>
+      <td class="text-muted">${fmtDate(s.updated_at)}</td>
+      <td><div class="row-actions">
+        <button class="btn-row" onclick="openSOPRecord('${s.id}')">Open</button>
+        <button class="btn-row" onclick="editSOPRecord('${s.id}')">Edit</button>
+        <button class="btn-row danger" onclick="deleteSOPRecord('${s.id}')">Delete</button>
+      </div></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+async function openSOPRecord(id) {
+  const s = await SOPStorageService.getSOP(id);
+  if (!s) return;
+  currentSOPRaw  = s.content;
+  currentSOPMeta = s;
+  const titleEl  = document.getElementById('sopTitleInput');
+  titleEl.value  = s.title;
+  titleEl.removeAttribute('readonly');
+  document.getElementById('sopCat').value = s.category;
+  renderSOPDoc(s.title, s.category, s.content, s.created_at);
+  showOutputActions();
+  switchTab('generator');
+}
+
+async function editSOPRecord(id) {
+  const s = await SOPStorageService.getSOP(id);
+  if (!s) return;
+  document.getElementById('rawInput').value   = s.content;
+  document.getElementById('sopCat').value     = s.category;
+  currentSOPMeta = s;
+  switchTab('generator');
+  toast('Loaded for editing — update the input and regenerate.', 'ok');
+}
+
+async function deleteSOPRecord(id) {
+  if (!confirm('Delete this SOP? This cannot be undone.')) return;
+  try {
+    await SOPStorageService.deleteSOP(id);
+    toast('SOP deleted.', 'ok');
+    renderLibrary();
+  } catch { toast('Delete failed.', 'err'); }
+}
+
+/* =====================================================================
+   SETTINGS
+   ===================================================================== */
+function openSettings() {
+  document.getElementById('apiKeyField').value = localStorage.getItem('vorpic_flow_api_key') || '';
+  document.getElementById('overlaySettings').classList.add('open');
+}
+function closeSettings() { document.getElementById('overlaySettings').classList.remove('open'); }
+function saveSettings() {
+  localStorage.setItem('vorpic_flow_api_key', document.getElementById('apiKeyField').value.trim());
+  localStorage.setItem('vf-dark', String(darkMode));
+  closeSettings();
+  toast('Settings saved.', 'ok');
+}
+
+/* =====================================================================
+   QUOTA MODAL
+   ===================================================================== */
+function showQuota() { document.getElementById('overlayQuota').classList.add('open'); }
+function closeQuota() { document.getElementById('overlayQuota').classList.remove('open'); }
+
+/* =====================================================================
+   TOASTS
+   ===================================================================== */
+function toast(msg, type) {
+  const c  = document.getElementById('toasts');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' ' + type : '');
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transition = 'opacity .25s';
+    setTimeout(() => el.remove(), 270);
+  }, 3200);
+}
+
+/* =====================================================================
+   UTILITIES
+   ===================================================================== */
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = d instanceof Date ? d : new Date(d);
+  return isNaN(dt) ? '—' : dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+</script>
+</body>
+</html>
