@@ -942,14 +942,14 @@ async function generateSOP(userMsg) {
   switch (provider) {
     case 'gemini':    return await callGemini(userMsg);
     case 'groq':      return await callGroq(userMsg);
-    case 'anthropic': return await callAnthropic(userMsg);
-    case 'openai':    return await callOpenAI(userMsg);
+    case 'openrouter': return await callOpenRouter(userMsg);
     default: throw new Error('Unknown provider: ' + provider);
   }
 }
 
 async function callGemini(userMsg) {
-  const key = localStorage.getItem('vorpic_flow_key_gemini') || 'AIzaSyDefault';
+  const key = localStorage.getItem('vorpic_flow_key_gemini') || '';
+  if (!key) throw new Error('MISSING_KEY');
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(key)}`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -985,46 +985,20 @@ async function callGroq(userMsg) {
   return data.choices?.[0]?.message?.content || '';
 }
 
-async function callAnthropic(userMsg) {
-  const key = localStorage.getItem('vorpic_flow_key_anthropic') || '';
+async function callOpenRouter(userMsg) {
+  const key = localStorage.getItem('vorpic_flow_key_openrouter') || '';
   if (!key) throw new Error('MISSING_KEY');
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': key,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model:      'claude-sonnet-4-20250514',
-      max_tokens: 1500,
-      system:     AI_SYSTEM_PROMPT,
-      messages:   [{ role: 'user', content: userMsg }]
-    })
-  });
-  if (!res.ok) {
-    const j = await res.json().catch(() => ({}));
-    throw new Error(j.error?.message || `Anthropic API error ${res.status}`);
-  }
-  const data = await res.json();
-  return data.content?.[0]?.text || '';
-}
-
-async function callOpenAI(userMsg) {
-  const key = localStorage.getItem('vorpic_flow_key_openai') || '';
-  if (!key) throw new Error('MISSING_KEY');
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'authorization': `Bearer ${key}` },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'meta-llama/llama-3.1-8b-instruct:free',
       messages: [{ role: 'system', content: AI_SYSTEM_PROMPT }, { role: 'user', content: userMsg }]
     })
   });
   if (!res.ok) {
     const j = await res.json().catch(() => ({}));
-    throw new Error(j.error?.message || `OpenAI API error ${res.status}`);
+    throw new Error(j.error?.message || `OpenRouter API error ${res.status}`);
   }
   const data = await res.json();
   return data.choices?.[0]?.message?.content || '';
@@ -1035,13 +1009,11 @@ async function handleGenerate() {
   if (!raw && !attachedFile) { toast('Enter some notes or upload a document first.', 'err'); return; }
 
   const provider = localStorage.getItem('vorpic_flow_provider') || 'gemini';
-  if (provider !== 'gemini') {
-    const lsKeys = { groq: 'vorpic_flow_key_groq', anthropic: 'vorpic_flow_key_anthropic', openai: 'vorpic_flow_key_openai' };
-    if (!localStorage.getItem(lsKeys[provider])) {
-      toast('This provider requires an API key. Open Settings to add yours.', 'err');
-      openSettings();
-      return;
-    }
+  const lsKeys = { gemini: 'vorpic_flow_key_gemini', groq: 'vorpic_flow_key_groq', openrouter: 'vorpic_flow_key_openrouter' };
+  if (!localStorage.getItem(lsKeys[provider])) {
+    toast('This provider requires an API key. Open Settings to add yours.', 'err');
+    openSettings();
+    return;
   }
 
   const category = document.getElementById('sopCat').value;
@@ -1266,18 +1238,14 @@ function onProviderChange() {
   const provider = document.getElementById('providerSelect').value;
   const el = document.getElementById('providerDetails');
 
-  if (provider === 'gemini') {
-    el.innerHTML = '<span class="field-hint">Free tier — no key required.</span>';
-    return;
-  }
-
   const configs = {
-    groq:      { lsKey: 'vorpic_flow_key_groq',      ph: 'gsk_…',         hint: 'Free tier — get a free key at <a href="https://console.groq.com" class="hint-link">console.groq.com</a> in under 2 minutes.' },
-    anthropic: { lsKey: 'vorpic_flow_key_anthropic', ph: 'sk-ant-api03-…', hint: 'Premium — requires your own Anthropic API key. <a href="https://console.anthropic.com" class="hint-link">console.anthropic.com</a>' },
-    openai:    { lsKey: 'vorpic_flow_key_openai',    ph: 'sk-…',           hint: 'Premium — requires your own OpenAI API key. <a href="https://platform.openai.com" class="hint-link">platform.openai.com</a>' }
+    gemini:     { lsKey: 'vorpic_flow_key_gemini',     ph: 'AIzaSy…',  hint: 'Free tier — get a free key at <a href="https://aistudio.google.com/app/apikey" class="hint-link">aistudio.google.com</a>.' },
+    groq:       { lsKey: 'vorpic_flow_key_groq',       ph: 'gsk_…',    hint: 'Free tier — get a free key at <a href="https://console.groq.com" class="hint-link">console.groq.com</a> in under 2 minutes.' },
+    openrouter: { lsKey: 'vorpic_flow_key_openrouter', ph: 'sk-or-…',  hint: 'Free tier — get a free key at <a href="https://openrouter.ai/keys" class="hint-link">openrouter.ai</a>.' }
   };
 
   const cfg = configs[provider];
+  if (!cfg) return;
   el.innerHTML = `<div class="form-grp">
     <label class="form-lbl">API Key</label>
     <input type="password" id="providerKeyField" class="form-input" placeholder="${esc(cfg.ph)}">
@@ -1290,15 +1258,297 @@ function saveSettings() {
   const provider = document.getElementById('providerSelect').value;
   localStorage.setItem('vorpic_flow_provider', provider);
 
-  if (provider !== 'gemini') {
-    const lsKeys = { groq: 'vorpic_flow_key_groq', anthropic: 'vorpic_flow_key_anthropic', openai: 'vorpic_flow_key_openai' };
-    const keyField = document.getElementById('providerKeyField');
-    if (keyField) localStorage.setItem(lsKeys[provider], keyField.value.trim());
-  }
+  const lsKeys = { gemini: 'vorpic_flow_key_gemini', groq: 'vorpic_flow_key_groq', openrouter: 'vorpic_flow_key_openrouter' };
+  const keyField = document.getElementById('providerKeyField');
+  if (keyField && lsKeys[provider]) localStorage.setItem(lsKeys[provider], keyField.value.trim());
 
   localStorage.setItem('vf-dark', String(darkMode));
+  updateBanner();
   closeSettings();
   toast('Settings saved.', 'ok');
+}
+
+/* =====================================================================
+   BANNER
+   ===================================================================== */
+function updateBanner() {
+  const provider = localStorage.getItem('vorpic_flow_provider') || 'gemini';
+  const lsKeys = { gemini: 'vorpic_flow_key_gemini', groq: 'vorpic_flow_key_groq', openrouter: 'vorpic_flow_key_openrouter' };
+  const hasKey  = !!localStorage.getItem(lsKeys[provider]);
+  const dismissed = localStorage.getItem('vorpic_flow_banner_dismissed') === 'true';
+  const show = !hasKey && !dismissed;
+  document.getElementById('setupBanner').classList.toggle('hidden', !show);
+  document.body.classList.toggle('has-banner', show);
+}
+
+function dismissBanner() {
+  localStorage.setItem('vorpic_flow_banner_dismissed', 'true');
+  updateBanner();
+}
+
+/* =====================================================================
+   ONBOARDING WIZARD
+   ===================================================================== */
+const WIZARD_PROVIDERS = {
+  gemini: {
+    name: 'Gemini 1.5 Flash',
+    badge: 'Recommended — 1,500 free req/day',
+    desc: 'Google Gemini 1.5 Flash is Google\'s free-tier generative AI, offering up to 1,500 requests per day at no cost via Google AI Studio.',
+    link: 'https://aistudio.google.com/app/apikey',
+    lsKey: 'vorpic_flow_key_gemini',
+    ph: 'AIzaSy…',
+    steps: [
+      'Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" class="wiz-inline-link">aistudio.google.com</a>',
+      'Sign in with a Google account — no credit card required',
+      'Click <strong>Create API key</strong> and select or create a project',
+      'Copy the generated key'
+    ]
+  },
+  groq: {
+    name: 'Groq Llama 3',
+    badge: 'Fastest — low latency',
+    desc: 'Groq runs open-source Llama 3 at extremely fast speeds on custom hardware. Free tier provides generous daily limits.',
+    link: 'https://console.groq.com',
+    lsKey: 'vorpic_flow_key_groq',
+    ph: 'gsk_…',
+    steps: [
+      'Go to <a href="https://console.groq.com" target="_blank" class="wiz-inline-link">console.groq.com</a>',
+      'Sign up for a free account — no credit card required',
+      'Navigate to <strong>API Keys</strong> in the left sidebar',
+      'Click <strong>Create API Key</strong>, name it, and copy it'
+    ]
+  },
+  openrouter: {
+    name: 'OpenRouter',
+    badge: 'Most flexible — 50+ free models',
+    desc: 'OpenRouter is a unified API gateway giving access to 50+ AI models through a single key, many available for free.',
+    link: 'https://openrouter.ai/keys',
+    lsKey: 'vorpic_flow_key_openrouter',
+    ph: 'sk-or-…',
+    steps: [
+      'Go to <a href="https://openrouter.ai" target="_blank" class="wiz-inline-link">openrouter.ai</a>',
+      'Sign up for a free account — no credit card required',
+      'Navigate to <strong>Keys</strong> in your account settings',
+      'Click <strong>Create Key</strong> and copy it'
+    ]
+  }
+};
+
+let wizStep = 1;
+let wizProvider = 'gemini';
+let wizTestPassed = false;
+
+function showWizard() {
+  wizStep = 1;
+  wizProvider = localStorage.getItem('vorpic_flow_provider') || 'gemini';
+  wizTestPassed = false;
+  renderWizardStep();
+  document.getElementById('overlayWizard').classList.add('open');
+}
+
+function hideWizard() {
+  document.getElementById('overlayWizard').classList.remove('open');
+}
+
+function rerunWizard() {
+  closeSettings();
+  localStorage.removeItem('vorpic_flow_onboarded');
+  showWizard();
+}
+
+function renderWizardStep() {
+  document.getElementById('wizProgressFill').style.width = ((wizStep / 5) * 100) + '%';
+  document.getElementById('wizStepLabel').textContent = `Step ${wizStep} of 5`;
+
+  const body   = document.getElementById('wizBody');
+  const footer = document.getElementById('wizFooter');
+  const cfg    = WIZARD_PROVIDERS[wizProvider];
+
+  if (wizStep === 1) {
+    body.innerHTML = `
+      <div class="wiz-welcome">
+        <div class="wiz-brandmark">VP</div>
+        <div class="wiz-h1">Welcome to Vorpic Flow</div>
+        <div class="wiz-sub">Generate professional Standard Operating Procedure documents from raw notes in seconds — powered by free AI providers.</div>
+      </div>`;
+    footer.innerHTML = `
+      <div class="wiz-footer-end">
+        <button class="btn-wiz primary" onclick="wizNext()">Get Started</button>
+      </div>`;
+
+  } else if (wizStep === 2) {
+    const cards = ['gemini', 'groq', 'openrouter'].map(k => {
+      const p = WIZARD_PROVIDERS[k];
+      return `<div class="wiz-card${wizProvider === k ? ' selected' : ''}" onclick="wizSelectProvider('${k}')">
+        <div class="wiz-card-name">${p.name}</div>
+        <span class="wiz-card-badge">${p.badge}</span>
+      </div>`;
+    }).join('');
+    body.innerHTML = `
+      <div class="wiz-h2">Choose your AI provider</div>
+      <div class="wiz-sub-left">All three are free with a free account key. You can change this later in Settings.</div>
+      <div class="wiz-cards">${cards}</div>`;
+    footer.innerHTML = `
+      <span class="wiz-skip" onclick="wizSkip()">Skip for now</span>
+      <div class="wiz-footer-end">
+        <button class="btn-wiz" onclick="wizBack()">Back</button>
+        <button class="btn-wiz primary" onclick="wizNext()">Next</button>
+      </div>`;
+
+  } else if (wizStep === 3) {
+    const stepsHtml = cfg.steps.map((s, i) =>
+      `<div class="wiz-step-item">
+        <div class="wiz-step-num">${i + 1}</div>
+        <div class="wiz-step-text">${s}</div>
+      </div>`
+    ).join('');
+    body.innerHTML = `
+      <div class="wiz-h2">Get your ${cfg.name} key</div>
+      <div class="wiz-provider-desc">${cfg.desc}</div>
+      <div class="wiz-steps">${stepsHtml}</div>
+      <a href="${cfg.link}" target="_blank" class="btn-wiz-link">
+        Get your free API key
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+      </a>`;
+    footer.innerHTML = `
+      <span class="wiz-skip" onclick="wizSkip()">Skip for now</span>
+      <div class="wiz-footer-end">
+        <button class="btn-wiz" onclick="wizBack()">Back</button>
+        <button class="btn-wiz primary" onclick="wizNext()">I have my key</button>
+      </div>`;
+
+  } else if (wizStep === 4) {
+    const savedKey = localStorage.getItem(cfg.lsKey) || '';
+    if (savedKey) wizTestPassed = true;
+    const resultClass = savedKey ? ' ok' : '';
+    const resultText  = savedKey ? '✓ Key saved' : '';
+    body.innerHTML = `
+      <div class="wiz-h2">Connect your API key</div>
+      <div class="wiz-sub-left">Paste your ${cfg.name} API key below. It is stored only in your browser.</div>
+      <div class="wiz-input-wrap">
+        <input type="password" id="wizKeyInput" class="form-input wiz-key-input" placeholder="${esc(cfg.ph)}" value="${esc(savedKey)}">
+        <button class="wiz-show-key" onclick="wizToggleKey()" title="Show/hide">
+          <svg id="wizEyeIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <button id="wizTestBtn" class="btn-wiz-test" onclick="wizTestConnection()">Test Connection</button>
+      <div id="wizTestResult" class="wiz-test-result${resultClass}">${esc(resultText)}</div>`;
+    footer.innerHTML = `
+      <span class="wiz-skip" onclick="wizSkip()">Skip for now</span>
+      <div class="wiz-footer-end">
+        <button class="btn-wiz" onclick="wizBack()">Back</button>
+        <button class="btn-wiz primary" id="wizNextBtn" onclick="wizNext()"${wizTestPassed ? '' : ' disabled'}>Next</button>
+      </div>`;
+
+  } else if (wizStep === 5) {
+    body.innerHTML = `
+      <div class="wiz-complete">
+        <div class="wiz-check">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="wiz-h1">You're all set!</div>
+        <div class="wiz-sub">Vorpic Flow is ready. Start by pasting your notes or a rough draft into the SOP Generator.</div>
+      </div>`;
+    footer.innerHTML = `
+      <div class="wiz-footer-center">
+        <button class="btn-wiz primary" onclick="wizFinish()">Enter Flow</button>
+      </div>`;
+  }
+}
+
+function wizSelectProvider(p) {
+  wizProvider = p;
+  localStorage.setItem('vorpic_flow_provider', p);
+  renderWizardStep();
+}
+
+function wizNext() {
+  if (wizStep < 5) { wizStep++; wizTestPassed = false; renderWizardStep(); }
+}
+
+function wizBack() {
+  if (wizStep > 1) { wizStep--; renderWizardStep(); }
+}
+
+function wizSkip() {
+  localStorage.setItem('vorpic_flow_onboarded', 'true');
+  hideWizard();
+  localStorage.removeItem('vorpic_flow_banner_dismissed');
+  updateBanner();
+}
+
+function wizFinish() {
+  localStorage.setItem('vorpic_flow_onboarded', 'true');
+  hideWizard();
+  updateBanner();
+}
+
+function wizToggleKey() {
+  const input = document.getElementById('wizKeyInput');
+  const icon  = document.getElementById('wizEyeIcon');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  } else {
+    input.type = 'password';
+    icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+}
+
+async function wizTestConnection() {
+  const btn    = document.getElementById('wizTestBtn');
+  const result = document.getElementById('wizTestResult');
+  const key    = document.getElementById('wizKeyInput').value.trim();
+
+  if (!key) {
+    result.className = 'wiz-test-result err';
+    result.textContent = 'Please enter an API key first.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Testing…';
+  result.className = 'wiz-test-result';
+  result.textContent = '';
+
+  try {
+    await callProviderTest(wizProvider, key);
+    result.className = 'wiz-test-result ok';
+    result.textContent = '✓ Connected successfully';
+    wizTestPassed = true;
+    localStorage.setItem(WIZARD_PROVIDERS[wizProvider].lsKey, key);
+    document.getElementById('wizNextBtn').disabled = false;
+  } catch {
+    result.className = 'wiz-test-result err';
+    result.textContent = 'Key invalid — please check and try again.';
+    wizTestPassed = false;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Test Connection';
+  }
+}
+
+async function callProviderTest(provider, key) {
+  const msg = 'Reply with one word: ok';
+  if (provider === 'gemini') {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(key)}`, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: msg }] }] })
+    });
+    if (!res.ok) { const j = await res.json().catch(() => ({})); throw new Error(j.error?.message || 'error'); }
+  } else if (provider === 'groq') {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST', headers: { 'content-type': 'application/json', 'authorization': `Bearer ${key}` },
+      body: JSON.stringify({ model: 'llama3-8b-8192', messages: [{ role: 'user', content: msg }], max_tokens: 5 })
+    });
+    if (!res.ok) { const j = await res.json().catch(() => ({})); throw new Error(j.error?.message || 'error'); }
+  } else if (provider === 'openrouter') {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST', headers: { 'content-type': 'application/json', 'authorization': `Bearer ${key}` },
+      body: JSON.stringify({ model: 'meta-llama/llama-3.1-8b-instruct:free', messages: [{ role: 'user', content: msg }], max_tokens: 5 })
+    });
+    if (!res.ok) { const j = await res.json().catch(() => ({})); throw new Error(j.error?.message || 'error'); }
+  }
 }
 
 /* =====================================================================
