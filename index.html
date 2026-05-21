@@ -324,6 +324,8 @@
     }
     .form-input:focus { border-color: var(--accent); }
     .field-hint { font-size: 11px; color: var(--text3); }
+    .hint-link { color: var(--accent); }
+    .hint-link:hover { color: var(--accent2); }
 
     .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .toggle-lbl { font-size: 13px; color: var(--text); }
@@ -556,11 +558,18 @@
     <div class="modal-body">
 
       <div class="settings-sec">
-        <div class="settings-sec-title">Anthropic API</div>
+        <div class="settings-sec-title">AI Provider</div>
         <div class="form-grp">
-          <label class="form-lbl" for="apiKeyField">API Key</label>
-          <input type="password" id="apiKeyField" class="form-input" placeholder="sk-ant-api03-…">
-          <span class="field-hint">Stored in your browser only. Never sent anywhere other than api.anthropic.com.</span>
+          <label class="form-lbl" for="providerSelect">Provider</label>
+          <select id="providerSelect" class="form-select" onchange="onProviderChange()">
+            <option value="gemini">Google Gemini 1.5 Flash</option>
+            <option value="groq">Groq (Llama 3)</option>
+            <option value="anthropic">Anthropic Claude</option>
+            <option value="openai">OpenAI</option>
+          </select>
+        </div>
+        <div id="providerDetails">
+          <span class="field-hint">Free tier — no key required.</span>
         </div>
       </div>
 
@@ -586,7 +595,7 @@
 
       <div class="settings-sec">
         <div class="settings-sec-title">About</div>
-        <div class="about-mono">Vorpic Flow — v0.1 beta · Hagans Consulting</div>
+        <div class="about-mono">Vorpic Flow — v0.2 beta · Hagans Consulting</div>
       </div>
 
     </div>
@@ -712,7 +721,6 @@ let attachedFile   = null;  // { name, text }
 (async () => {
   darkMode = localStorage.getItem('vf-dark') !== 'false';
   applyTheme();
-  document.getElementById('apiKeyField').value = localStorage.getItem('vorpic_flow_api_key') || '';
   await renderLibrary();
 })();
 
@@ -764,35 +772,126 @@ function removeFile() {
 }
 
 /* =====================================================================
-   SOP GENERATION — Anthropic API
+   AI PROVIDERS — Router + per-provider call functions
    ===================================================================== */
-const SYSTEM_PROMPT = `You are a professional SOP (Standard Operating Procedure) writer for business operations. Convert the user's raw input into a clean, professional SOP document.
+const AI_SYSTEM_PROMPT = `You are an expert operations consultant. Format the following input into a clean, professional Standard Operating Procedure document with these sections: Purpose, Scope, Responsibilities, Procedure (numbered steps), and Notes. Be concise and professional.
 
-Format the output with these exact section headers in this order, using bold markdown (**Header**):
+Use these exact bold markdown section headers in this order:
 
 **Purpose**
-A concise statement of why this SOP exists and what outcome it ensures.
-
 **Scope**
-Who this SOP applies to and what activities, systems, or departments it covers.
-
 **Responsibilities**
-Who is responsible for following this SOP and who owns and maintains it.
-
 **Procedure**
-Step-by-step numbered instructions. Each step must be a complete, actionable sentence.
-
 **Notes**
-Additional context, exceptions, edge cases, version references, or important reminders.
 
-Rules: Use active voice. Professional tone. No sections beyond these five. Procedure must use a numbered list.`;
+The Procedure section must use a numbered list. No sections beyond these five.`;
+
+async function generateSOP(userMsg) {
+  const provider = localStorage.getItem('vorpic_flow_provider') || 'gemini';
+  switch (provider) {
+    case 'gemini':    return await callGemini(userMsg);
+    case 'groq':      return await callGroq(userMsg);
+    case 'anthropic': return await callAnthropic(userMsg);
+    case 'openai':    return await callOpenAI(userMsg);
+    default: throw new Error('Unknown provider: ' + provider);
+  }
+}
+
+async function callGemini(userMsg) {
+  const key = localStorage.getItem('vorpic_flow_key_gemini') || 'AIzaSyDefault';
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(key)}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: AI_SYSTEM_PROMPT }] },
+      contents: [{ role: 'user', parts: [{ text: userMsg }] }]
+    })
+  });
+  if (!res.ok) {
+    const j = await res.json().catch(() => ({}));
+    throw new Error(j.error?.message || `Gemini API error ${res.status}`);
+  }
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+async function callGroq(userMsg) {
+  const key = localStorage.getItem('vorpic_flow_key_groq') || '';
+  if (!key) throw new Error('MISSING_KEY');
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'authorization': `Bearer ${key}` },
+    body: JSON.stringify({
+      model: 'llama3-8b-8192',
+      messages: [{ role: 'system', content: AI_SYSTEM_PROMPT }, { role: 'user', content: userMsg }]
+    })
+  });
+  if (!res.ok) {
+    const j = await res.json().catch(() => ({}));
+    throw new Error(j.error?.message || `Groq API error ${res.status}`);
+  }
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content || '';
+}
+
+async function callAnthropic(userMsg) {
+  const key = localStorage.getItem('vorpic_flow_key_anthropic') || '';
+  if (!key) throw new Error('MISSING_KEY');
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model:      'claude-sonnet-4-20250514',
+      max_tokens: 1500,
+      system:     AI_SYSTEM_PROMPT,
+      messages:   [{ role: 'user', content: userMsg }]
+    })
+  });
+  if (!res.ok) {
+    const j = await res.json().catch(() => ({}));
+    throw new Error(j.error?.message || `Anthropic API error ${res.status}`);
+  }
+  const data = await res.json();
+  return data.content?.[0]?.text || '';
+}
+
+async function callOpenAI(userMsg) {
+  const key = localStorage.getItem('vorpic_flow_key_openai') || '';
+  if (!key) throw new Error('MISSING_KEY');
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'authorization': `Bearer ${key}` },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'system', content: AI_SYSTEM_PROMPT }, { role: 'user', content: userMsg }]
+    })
+  });
+  if (!res.ok) {
+    const j = await res.json().catch(() => ({}));
+    throw new Error(j.error?.message || `OpenAI API error ${res.status}`);
+  }
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content || '';
+}
 
 async function handleGenerate() {
-  const raw    = document.getElementById('rawInput').value.trim();
-  const apiKey = localStorage.getItem('vorpic_flow_api_key') || '';
-
+  const raw = document.getElementById('rawInput').value.trim();
   if (!raw && !attachedFile) { toast('Enter some notes or upload a document first.', 'err'); return; }
-  if (!apiKey)               { toast('Add your Anthropic API key in Settings first.', 'err'); openSettings(); return; }
+
+  const provider = localStorage.getItem('vorpic_flow_provider') || 'gemini';
+  if (provider !== 'gemini') {
+    const lsKeys = { groq: 'vorpic_flow_key_groq', anthropic: 'vorpic_flow_key_anthropic', openai: 'vorpic_flow_key_openai' };
+    if (!localStorage.getItem(lsKeys[provider])) {
+      toast('This provider requires an API key. Open Settings to add yours.', 'err');
+      openSettings();
+      return;
+    }
+  }
 
   const category = document.getElementById('sopCat').value;
   let userMsg = raw;
@@ -804,29 +903,7 @@ async function handleGenerate() {
   btn.innerHTML = '<div class="spin"></div> Generating…';
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model:      'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system:     SYSTEM_PROMPT,
-        messages:   [{ role: 'user', content: userMsg }]
-      })
-    });
-
-    if (!res.ok) {
-      const j = await res.json().catch(() => ({}));
-      throw new Error(j.error?.message || `API error ${res.status}`);
-    }
-
-    const data = await res.json();
-    currentSOPRaw  = data.content?.[0]?.text || '';
+    currentSOPRaw  = await generateSOP(userMsg);
     currentSOPMeta = null;
 
     const firstLine = raw.split('\n')[0].trim().replace(/^[#*\->|\s]+/, '');
@@ -841,7 +918,12 @@ async function handleGenerate() {
     toast('SOP generated.', 'ok');
 
   } catch (err) {
-    toast('Generation failed: ' + err.message, 'err');
+    if (err.message === 'MISSING_KEY') {
+      toast('This provider requires an API key. Open Settings to add yours.', 'err');
+      openSettings();
+    } else {
+      toast('Generation failed: ' + err.message, 'err');
+    }
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> Generate SOP';
@@ -1021,12 +1103,48 @@ async function deleteSOPRecord(id) {
    SETTINGS
    ===================================================================== */
 function openSettings() {
-  document.getElementById('apiKeyField').value = localStorage.getItem('vorpic_flow_api_key') || '';
+  const provider = localStorage.getItem('vorpic_flow_provider') || 'gemini';
+  document.getElementById('providerSelect').value = provider;
+  onProviderChange();
   document.getElementById('overlaySettings').classList.add('open');
 }
+
 function closeSettings() { document.getElementById('overlaySettings').classList.remove('open'); }
+
+function onProviderChange() {
+  const provider = document.getElementById('providerSelect').value;
+  const el = document.getElementById('providerDetails');
+
+  if (provider === 'gemini') {
+    el.innerHTML = '<span class="field-hint">Free tier — no key required.</span>';
+    return;
+  }
+
+  const configs = {
+    groq:      { lsKey: 'vorpic_flow_key_groq',      ph: 'gsk_…',         hint: 'Free tier — get a free key at <a href="https://console.groq.com" class="hint-link">console.groq.com</a> in under 2 minutes.' },
+    anthropic: { lsKey: 'vorpic_flow_key_anthropic', ph: 'sk-ant-api03-…', hint: 'Premium — requires your own Anthropic API key. <a href="https://console.anthropic.com" class="hint-link">console.anthropic.com</a>' },
+    openai:    { lsKey: 'vorpic_flow_key_openai',    ph: 'sk-…',           hint: 'Premium — requires your own OpenAI API key. <a href="https://platform.openai.com" class="hint-link">platform.openai.com</a>' }
+  };
+
+  const cfg = configs[provider];
+  el.innerHTML = `<div class="form-grp">
+    <label class="form-lbl">API Key</label>
+    <input type="password" id="providerKeyField" class="form-input" placeholder="${esc(cfg.ph)}">
+    <span class="field-hint">${cfg.hint}</span>
+  </div>`;
+  document.getElementById('providerKeyField').value = localStorage.getItem(cfg.lsKey) || '';
+}
+
 function saveSettings() {
-  localStorage.setItem('vorpic_flow_api_key', document.getElementById('apiKeyField').value.trim());
+  const provider = document.getElementById('providerSelect').value;
+  localStorage.setItem('vorpic_flow_provider', provider);
+
+  if (provider !== 'gemini') {
+    const lsKeys = { groq: 'vorpic_flow_key_groq', anthropic: 'vorpic_flow_key_anthropic', openai: 'vorpic_flow_key_openai' };
+    const keyField = document.getElementById('providerKeyField');
+    if (keyField) localStorage.setItem(lsKeys[provider], keyField.value.trim());
+  }
+
   localStorage.setItem('vf-dark', String(darkMode));
   closeSettings();
   toast('Settings saved.', 'ok');
