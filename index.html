@@ -26,7 +26,7 @@
       --blue:       #4da6ff;
       --purple:     #a78bfa;
       --radius:     6px;
-      --radius-lg:  10px;
+      --radius-lg:  12px;
       --shadow:     0 2px 8px rgba(0,0,0,0.08);
       --shadow-lg:  0 8px 32px rgba(0,0,0,0.15);
       --font:       'IBM Plex Sans', system-ui, sans-serif;
@@ -105,8 +105,8 @@
     #pane-generator .form-grp-stretch .textarea-raw { min-height: 220px; }
 
     /* ── WORKSPACE TAB ── */
-    #pane-workspace { overflow: hidden; max-width: 1400px; margin: 0 auto; padding: 0 28px; width: 100%; }
-    #pane-workspace .output-panel { flex: 1; height: 100%; }
+    #pane-workspace { overflow: hidden; background: var(--bg); padding: 16px 28px 28px; }
+    #pane-workspace .output-panel { flex: 1; min-height: 0; }
 
     /* ── INPUT PANEL ── */
     .input-panel {
@@ -252,8 +252,8 @@
     .sop-section-body p  { margin-bottom: 8px; }
 
     /* ── LIBRARY FOLDERS ── */
-    #pane-library { max-width: 1400px; margin: 0 auto; padding: 0 28px; width: 100%; }
-    .lib-layout { display: flex; height: 100%; overflow: hidden; }
+    #pane-library { background: var(--bg); padding: 16px 28px 28px; }
+    .lib-layout { display: flex; flex: 1; min-height: 0; overflow: hidden; background: var(--bg2); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow); }
     .lib-sidebar {
       width: 196px; flex-shrink: 0;
       background: var(--bg2); border-right: 1px solid var(--border);
@@ -322,7 +322,7 @@
 
     /* ── WORKSPACE DOC VIEW ── */
     #genEmpty { flex: 1; }
-    #workspaceDocView { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+    #workspaceDocView { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; background: var(--bg2); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow); }
 
     /* ── REGEN PANEL ── */
     .regen-panel { border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--bg2); }
@@ -364,10 +364,10 @@
       text-align: left; padding: 9px 14px;
       font-size: 11px; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.06em; color: var(--text3);
-      background: var(--bg2); border-bottom: 1px solid var(--border);
+      background: var(--bg3); border-bottom: 1px solid var(--border);
     }
     .sop-table td { padding: 13px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    .sop-table tbody tr:hover td { background: var(--bg2); }
+    .sop-table tbody tr:hover td { background: var(--bg3); }
     .sop-table tbody tr:last-child td { border-bottom: none; }
 
     .cat-pill {
