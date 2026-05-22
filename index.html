@@ -1143,6 +1143,7 @@ let activeFolderId     = null;   // null = All Documents
 let workspaceOrigin    = null;   // 'create' | 'library' — set on workspace entry
 let workspaceCategory  = 'General'; // tracks current working category
 let selectedLibIds     = new Set(); // bulk-selected library doc IDs
+let workingContent     = '';        // sopDoc.innerHTML captured on every input/blur
 
 /* =====================================================================
    INIT
@@ -1157,6 +1158,7 @@ let selectedLibIds     = new Set(); // bulk-selected library doc IDs
   }
   updateBanner();
   const sopDoc = document.getElementById('sopDoc');
+  sopDoc.addEventListener('input', () => { workingContent = sopDoc.innerHTML; });
   sopDoc.addEventListener('blur', onSOPDocBlur);
 
   // Scroll persistence — attach listeners to each tab's scrollable container
@@ -1524,26 +1526,31 @@ function showOutputActions() {
    SAVE / COPY / PRINT
    ===================================================================== */
 async function handleSave() {
-  const freshContent = document.getElementById('sopDoc').innerHTML;
-  if (!freshContent.trim()) return;
+  const sopDocEl = document.getElementById('sopDoc');
+  const content  = workingContent || sopDocEl.innerHTML || currentSOPRaw || '';
+  console.log('[Vorpic Flow] handleSave: contentLen =', content.length, '| preview:', content.slice(0, 120));
+  if (!content.trim()) {
+    toast('Content is empty — nothing to save.', 'err');
+    return;
+  }
   const title    = document.getElementById('sopTitleInput').value.trim() || 'Untitled SOP';
   const category = workspaceCategory || 'General';
   const now      = new Date().toISOString();
 
   const record = activeEditId
-    ? { ...(currentSOPMeta ?? {}), id: activeEditId, title, category, content: freshContent, updated_at: now }
-    : { id: crypto.randomUUID(), title, category, content: freshContent, created_at: now, updated_at: now, owner_id: null };
+    ? { ...(currentSOPMeta ?? {}), id: activeEditId, title, category, content, updated_at: now }
+    : { id: crypto.randomUUID(), title, category, content, created_at: now, updated_at: now, owner_id: null };
 
   try {
     await SOPStorageService.saveSOP(record);
-    if (activeEditId) await loadSOPById(activeEditId);
+    const verified = await loadSOPById(record.id);
+    console.log('[Vorpic Flow] handleSave: verified =', verified ? `id=${verified.id} contentLen=${(verified.content || '').length}` : 'NOT FOUND');
     await renderFolders();
     await renderLibrary();
     toast('Saved to Document Library.', 'ok');
-    const dest = workspaceOrigin || 'library';
+    workingContent = '';
     clearWorkspace();
     resetDocState();
-    switchTab(dest);
   } catch { /* quota modal shown by service */ }
 }
 
@@ -1890,6 +1897,7 @@ function exitEditMode() {
 async function onSOPDocBlur() {
   if (!editModeActive || !activeEditId) return;
   const sopDoc  = document.getElementById('sopDoc');
+  workingContent = sopDoc.innerHTML;
   const titleEl = document.getElementById('sopTitleInput');
   const now     = new Date().toISOString();
   const base    = currentSOPMeta ?? { id: activeEditId };
@@ -1960,10 +1968,10 @@ function collapseRegenPanel() {
 }
 
 function handleCancel() {
-  if (!confirm('Discard changes to this document?')) return;
+  if (!confirm('Discard this document?')) return;
+  workingContent = '';
   clearWorkspace();
   resetDocState();
-  switchTab('library');
 }
 
 async function handleRegenerate() {
