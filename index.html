@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vorpic Flow — Knowledge Base &amp; SOP Generator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@700&display=swap" rel="stylesheet">
 
   <!-- STYLES -->
   <style>
@@ -31,6 +31,7 @@
       --shadow-lg:  0 8px 32px rgba(0,0,0,0.15);
       --font:       'IBM Plex Sans', system-ui, sans-serif;
       --mono:       'IBM Plex Mono', monospace;
+      --font-head:  'Syne', sans-serif;
     }
     [data-theme="dark"] {
       --bg:        #0e0f11;
@@ -60,7 +61,7 @@
     .brand-link{display:flex;align-items:center;gap:10px;text-decoration:none}
     .brand-link:hover .brand-name{color:rgba(255,255,255,0.8)}
     .brand-logo-mark{width:30px;height:30px;flex-shrink:0}
-    .brand-name{font-weight:700;font-size:16px;color:#fff;letter-spacing:-0.02em;transition:color 0.15s}
+    .brand-name{font-family:var(--font-head);font-weight:700;font-size:16px;color:#fff;letter-spacing:-0.02em;transition:color 0.15s}
     .brand-divider{width:1px;height:18px;background:rgba(255,255,255,0.15);margin:0 4px}
     .brand-product{display:flex;flex-direction:column;line-height:1.3}
     .brand-product-name{font-size:12px;color:rgba(255,255,255,0.5)}
@@ -192,6 +193,11 @@
       padding: 6px 20px; font-size: 12px; color: var(--amber); flex-shrink: 0;
       background: rgba(245,166,35,0.07); border-bottom: 1px solid rgba(245,166,35,0.18);
     }
+    .readonly-banner {
+      padding: 6px 20px; font-size: 12px; color: var(--text2); flex-shrink: 0;
+      background: var(--bg3); border-bottom: 1px solid var(--border);
+    }
+    .content-error { font-size: 14px; color: var(--red); padding: 16px 0; }
 
     .btn-action {
       display: flex; align-items: center; gap: 5px;
@@ -375,6 +381,17 @@
     }
     .btn-row:hover        { border-color: var(--border2); color: var(--text); background: var(--bg3); }
     .btn-row.danger:hover { border-color: var(--red); color: var(--red); background: rgba(255,77,77,0.08); }
+    .btn-action.danger { border-color: var(--red); color: var(--red); }
+    .btn-action.danger:hover { background: rgba(255,77,77,0.08); }
+    .bulk-toolbar {
+      display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+      padding: 8px 24px; background: var(--bg3); border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .bulk-count { font-size: 13px; font-weight: 600; color: var(--text); }
+    .bulk-sep { width: 1px; height: 20px; background: var(--border2); flex-shrink: 0; }
+    .col-check { width: 36px; text-align: center; padding: 0 !important; }
+    .lib-checkbox { width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent); }
 
     /* ── MODALS ── */
     .overlay {
@@ -761,6 +778,10 @@
             <input type="text" id="sopTitleInput" class="output-title" placeholder="SOP title will appear here…" readonly>
           </div>
           <span id="workspaceSavedFlash" class="saved-flash">Saved</span>
+          <button class="btn-action hidden" id="btnEdit" onclick="enterReadOnlyEditMode()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit
+          </button>
           <button class="btn-action cancel" id="btnCancel" onclick="handleCancel()">Cancel</button>
           <button class="btn-action prim" id="btnSave" onclick="handleSave()">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
@@ -779,6 +800,7 @@
             Download
           </button>
         </div>
+        <div id="readonlyBanner" class="readonly-banner hidden">Viewing document — click Edit to make changes.</div>
         <!-- Collapsible AI regeneration panel -->
         <div class="regen-panel" id="regenPanel">
           <div class="regen-toggle-row" onclick="toggleRegenPanel()">
@@ -854,6 +876,16 @@
             <option value="Finance">Finance</option>
             <option value="Custom">Custom</option>
           </select>
+        </div>
+        <div class="bulk-toolbar hidden" id="bulkToolbar">
+          <span class="bulk-count" id="bulkCount">0 selected</span>
+          <div class="bulk-sep"></div>
+          <select class="form-select form-select-sm" id="bulkFolderSel">
+            <option value="">Move to Folder…</option>
+          </select>
+          <button class="btn-action" onclick="bulkMoveToFolder()">Move</button>
+          <button class="btn-action" onclick="bulkExport()">Export Selected</button>
+          <button class="btn-action danger" onclick="bulkDelete()">Delete Selected</button>
         </div>
         <div class="lib-body" id="libBody"></div>
       </div>
@@ -1085,6 +1117,7 @@ let activeEditId       = null;   // id of the record being edited in Workspace
 let activeFolderId     = null;   // null = All Documents
 let workspaceOrigin    = null;   // 'create' | 'library' — set on workspace entry
 let workspaceCategory  = 'General'; // tracks current working category
+let selectedLibIds     = new Set(); // bulk-selected library doc IDs
 
 /* =====================================================================
    INIT
@@ -1316,6 +1349,14 @@ async function handleGenerate() {
 const SOP_SECTIONS = ['Purpose', 'Scope', 'Responsibilities', 'Procedure', 'Notes'];
 
 function renderSOPDoc(title, category, raw, date) {
+  if (!raw) {
+    console.error('[Vorpic Flow] renderSOPDoc: empty content for', title);
+    const el = document.getElementById('sopDoc');
+    if (el && !el.innerHTML.trim()) {
+      el.innerHTML = '<p class="content-error">Document content could not be loaded. Please re-open from the Library.</p>';
+    }
+    return;
+  }
   const parsed = parseSections(raw);
 
   let h = `<h1>${esc(title)}</h1>`;
@@ -1558,19 +1599,20 @@ async function renderLibrary() {
       <div class="empty-title">${sops.length ? 'No matching documents' : 'No documents yet'}</div>
       <div class="empty-desc">${sops.length ? 'Try adjusting your search or filter.' : 'Generate your first SOP and save it to build your library.'}</div>
     </div>`;
+    updateBulkToolbar();
     return;
   }
 
-  const folderOpts = folders.map(f =>
-    `<option value="${esc(f.id)}">${esc(f.name)}</option>`
-  ).join('');
+  const allChecked = filtered.every(s => selectedLibIds.has(s.id));
 
   el.innerHTML = `<table class="sop-table">
-    <thead><tr><th>Title</th><th>Category</th><th>Folder</th><th>Created</th><th>Last Updated</th><th>Actions</th></tr></thead>
+    <thead><tr>
+      <th class="col-check"><input type="checkbox" class="lib-checkbox" id="libSelectAll" ${allChecked ? 'checked' : ''} onchange="toggleSelectAll(this.checked)"></th>
+      <th>Title</th><th>Category</th><th>Folder</th><th>Created</th><th>Last Updated</th><th>Actions</th>
+    </tr></thead>
     <tbody>${filtered.map(s => {
-      const curFolder = s.folder_id ? (folders.find(f => f.id === s.folder_id)?.name || '') : '';
-      const selectVal = s.folder_id || '';
       return `<tr>
+        <td class="col-check"><input type="checkbox" class="lib-checkbox" value="${s.id}" ${selectedLibIds.has(s.id) ? 'checked' : ''} onchange="toggleLibCheckbox('${s.id}', this.checked)"></td>
         <td><strong>${esc(s.title)}</strong></td>
         <td><span class="cat-pill">${esc(s.category)}</span></td>
         <td>
@@ -1590,27 +1632,53 @@ async function renderLibrary() {
       </tr>`;
     }).join('')}</tbody>
   </table>`;
+  updateBulkToolbar();
 }
 
 async function openSOPRecord(id) {
   const s = await SOPStorageService.getSOP(id);
   if (!s) return;
+  if (!s.content) {
+    console.error('[Vorpic Flow] openSOPRecord: empty content for id', id, s);
+    toast('Document content is missing — it may be corrupted.', 'err');
+    return;
+  }
   currentSOPRaw      = s.content;
   currentSOPMeta     = { ...s };
   activeEditId       = null;
+  editModeActive     = false;
   workspaceOrigin    = 'library';
   workspaceCategory  = s.category;
   const titleEl = document.getElementById('sopTitleInput');
   titleEl.value = s.title;
-  titleEl.removeAttribute('readonly');
+  titleEl.setAttribute('readonly', '');
   exitEditMode();
   collapseRegenPanel();
   renderSOPDoc(s.title, s.category, s.content, s.created_at);
+  document.getElementById('sopDoc').setAttribute('contenteditable', 'false');
+  document.getElementById('editIndicator').classList.add('hidden');
+  document.getElementById('readonlyBanner').classList.remove('hidden');
+  document.getElementById('btnSave').classList.add('hidden');
+  document.getElementById('btnEdit').classList.remove('hidden');
   showWorkspaceDoc();
   ['generator', 'workspace', 'library'].forEach(t => {
     document.getElementById('pane-'  + t).classList.toggle('active', t === 'workspace');
     document.getElementById('tbtn-' + t).classList.toggle('active', t === 'workspace');
   });
+}
+
+function enterReadOnlyEditMode() {
+  if (!currentSOPMeta) return;
+  activeEditId   = currentSOPMeta.id;
+  editModeActive = true;
+  const titleEl = document.getElementById('sopTitleInput');
+  titleEl.removeAttribute('readonly');
+  document.getElementById('sopDoc').setAttribute('contenteditable', 'true');
+  document.getElementById('editIndicator').classList.remove('hidden');
+  document.getElementById('readonlyBanner').classList.add('hidden');
+  document.getElementById('btnSave').classList.remove('hidden');
+  document.getElementById('btnEdit').classList.add('hidden');
+  toast('Editing — changes auto-save on blur.', 'ok');
 }
 
 async function editSOPRecord(id) {
@@ -1723,6 +1791,9 @@ function clearWorkspace() {
   titleEl.setAttribute('readonly', '');
   document.getElementById('genEmpty').classList.remove('hidden');
   document.getElementById('workspaceDocView').classList.add('hidden');
+  document.getElementById('readonlyBanner').classList.add('hidden');
+  document.getElementById('btnEdit').classList.add('hidden');
+  document.getElementById('btnSave').classList.remove('hidden');
   collapseRegenPanel();
 }
 
@@ -1800,11 +1871,109 @@ async function handleRegenerate() {
 async function deleteSOPRecord(id) {
   if (!confirm('Delete this SOP? This cannot be undone.')) return;
   try {
+    selectedLibIds.delete(id);
     await SOPStorageService.deleteSOP(id);
     toast('SOP deleted.', 'ok');
     await renderFolders();
     await renderLibrary();
   } catch { toast('Delete failed.', 'err'); }
+}
+
+/* =====================================================================
+   BULK LIBRARY ACTIONS
+   ===================================================================== */
+function toggleLibCheckbox(id, checked) {
+  if (checked) selectedLibIds.add(id);
+  else selectedLibIds.delete(id);
+  const allCbs = document.querySelectorAll('.lib-checkbox:not(#libSelectAll)');
+  const allChecked = allCbs.length > 0 && [...allCbs].every(cb => cb.checked);
+  const selectAll = document.getElementById('libSelectAll');
+  if (selectAll) selectAll.checked = allChecked;
+  updateBulkToolbar();
+}
+
+function toggleSelectAll(checked) {
+  document.querySelectorAll('.lib-checkbox:not(#libSelectAll)').forEach(cb => {
+    cb.checked = checked;
+    if (checked) selectedLibIds.add(cb.value);
+    else selectedLibIds.delete(cb.value);
+  });
+  updateBulkToolbar();
+}
+
+async function updateBulkToolbar() {
+  const toolbar = document.getElementById('bulkToolbar');
+  if (!toolbar) return;
+  const count = selectedLibIds.size;
+  if (count === 0) { toolbar.classList.add('hidden'); return; }
+  toolbar.classList.remove('hidden');
+  document.getElementById('bulkCount').textContent = `${count} selected`;
+  const folders = await SOPStorageService.getAllFolders();
+  const sel = document.getElementById('bulkFolderSel');
+  sel.innerHTML = '<option value="">Move to Folder…</option><option value="__none__">— Remove from folder</option>' +
+    folders.map(f => `<option value="${esc(f.id)}">${esc(f.name)}</option>`).join('');
+}
+
+async function bulkDelete() {
+  const ids = [...selectedLibIds];
+  if (!ids.length) return;
+  if (!confirm(`Delete ${ids.length} document${ids.length > 1 ? 's' : ''}? This cannot be undone.`)) return;
+  for (const id of ids) await SOPStorageService.deleteSOP(id);
+  selectedLibIds.clear();
+  toast(`${ids.length} document${ids.length > 1 ? 's' : ''} deleted.`, 'ok');
+  await renderFolders();
+  await renderLibrary();
+}
+
+async function bulkMoveToFolder() {
+  const sel = document.getElementById('bulkFolderSel');
+  const folderId = sel.value;
+  if (!folderId) { toast('Select a folder first.', 'err'); return; }
+  const ids = [...selectedLibIds];
+  if (!ids.length) return;
+  const newFolderId = folderId === '__none__' ? null : folderId;
+  for (const id of ids) {
+    const s = await SOPStorageService.getSOP(id);
+    if (s) await SOPStorageService.saveSOP({ ...s, folder_id: newFolderId, updated_at: new Date().toISOString() });
+  }
+  selectedLibIds.clear();
+  toast(`Moved ${ids.length} document${ids.length > 1 ? 's' : ''}.`, 'ok');
+  await renderFolders();
+  await renderLibrary();
+}
+
+async function bulkExport() {
+  const ids = [...selectedLibIds];
+  if (!ids.length) return;
+  if (!confirm(`This will open ${ids.length} print dialog${ids.length > 1 ? 's' : ''} sequentially. Continue?`)) return;
+  const docView  = document.getElementById('workspaceDocView');
+  const genEmpty = document.getElementById('genEmpty');
+  const sopDoc   = document.getElementById('sopDoc');
+  const wasVisible = !docView.classList.contains('hidden');
+  const prevHtml   = sopDoc.innerHTML;
+  const prevTitle  = document.getElementById('sopTitleInput').value;
+  const prevRaw    = currentSOPRaw;
+  const prevMeta   = currentSOPMeta;
+  genEmpty.classList.add('hidden');
+  docView.classList.remove('hidden');
+  for (const id of ids) {
+    const s = await SOPStorageService.getSOP(id);
+    if (!s || !s.content) continue;
+    currentSOPRaw  = s.content;
+    currentSOPMeta = { ...s };
+    renderSOPDoc(s.title, s.category, s.content, s.created_at);
+    document.getElementById('sopTitleInput').value = s.title;
+    await new Promise(r => setTimeout(r, 50));
+    handleDownload();
+    await new Promise(r => setTimeout(r, 500));
+  }
+  currentSOPRaw  = prevRaw;
+  currentSOPMeta = prevMeta;
+  document.getElementById('sopTitleInput').value = prevTitle;
+  sopDoc.innerHTML = prevHtml;
+  if (!wasVisible) { docView.classList.add('hidden'); genEmpty.classList.remove('hidden'); }
+  selectedLibIds.clear();
+  await renderLibrary();
 }
 
 /* =====================================================================
