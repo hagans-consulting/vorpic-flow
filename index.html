@@ -428,12 +428,28 @@
       display: flex; align-items: center; justify-content: space-between;
       padding: 18px 22px 14px; border-bottom: 1px solid var(--border);
     }
-    .modal-title { font-size: 16px; font-weight: 600; }
+    .modal-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; }
     .modal-body  { padding: 22px; display: flex; flex-direction: column; gap: 22px; }
     .modal-footer {
       display: flex; justify-content: flex-end; gap: 8px;
       padding: 14px 22px; border-top: 1px solid var(--border);
     }
+    .modal-header{display:flex;align-items:flex-start;justify-content:space-between;padding:18px 22px 14px;border-bottom:1px solid var(--border)}
+    .modal-sub{font-size:12px;color:var(--text3);margin-top:3px}
+    .modal-close{background:var(--bg3);border:none;color:var(--text3);width:28px;height:28px;border-radius:6px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0}
+    .modal-close:hover{background:var(--border);color:var(--text)}
+    .settings-section{margin-bottom:0}
+    .settings-section-title{font-family:var(--font-head);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+    .settings-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0}
+    .settings-row-label{font-size:13px;font-weight:500;color:var(--text)}
+    .settings-row-sub{font-size:11px;color:var(--text3);margin-top:2px}
+    .settings-coming{font-size:12px;color:var(--text3);background:var(--bg3);padding:10px 14px;border-radius:var(--radius);font-style:italic}
+    .toggle-switch{position:relative;width:40px;height:22px;flex-shrink:0}
+    .toggle-switch input{opacity:0;width:0;height:0}
+    .toggle-slider{position:absolute;inset:0;background:var(--border2);border-radius:22px;cursor:pointer;transition:background 0.2s}
+    .toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform 0.2s}
+    .toggle-switch input:checked+.toggle-slider{background:var(--accent)}
+    .toggle-switch input:checked+.toggle-slider::before{transform:translateX(18px)}
 
     .settings-sec { display: flex; flex-direction: column; gap: 10px; }
     .settings-sec-title {
@@ -669,7 +685,7 @@
     #printFooter {
       display: none;
       position: fixed; bottom: 0; left: 0; right: 0;
-      font-family: system-ui, sans-serif; font-size: 10px; color: #9499a8;
+      font-family: var(--font-main); font-size: 10px; color: #9499a8;
       border-top: 1px solid #dde0e9; padding: 6px 32px;
       justify-content: space-between;
     }
@@ -923,59 +939,39 @@
 
 <!-- SETTINGS MODAL -->
 <div class="overlay" id="overlaySettings">
-  <div class="modal">
-    <div class="modal-hdr">
-      <span class="modal-title">Settings</span>
-      <button class="btn-icon" onclick="closeSettings()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div><div class="modal-title">Settings</div><div class="modal-sub">Vorpic Flow</div></div>
+      <button class="modal-close" onclick="closeSettings()">✕</button>
     </div>
     <div class="modal-body">
-
-      <div class="settings-sec">
-        <div class="settings-sec-title">AI Provider — Groq</div>
+      <div class="settings-section">
+        <div class="settings-section-title">AI Provider — Groq</div>
         <div class="form-grp">
           <label class="form-lbl">API Key</label>
           <input type="password" id="groqKeyField" class="form-input" placeholder="gsk_…">
           <span class="field-hint">Free tier — get your key at <a href="https://console.groq.com" target="_blank" class="hint-link">console.groq.com</a>.</span>
         </div>
       </div>
-
-      <div class="settings-sec">
-        <div class="settings-sec-title">Navigation</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
-          <div>
-            <div style="font-size:13px;font-weight:500;color:var(--text);">Return to HomeDeck</div>
-            <div style="font-size:11px;color:var(--text3);margin-top:2px;">Go back to the Vorpic suite launcher</div>
-          </div>
-          <a href="https://hagans-consulting.github.io/vorpic-homedeck/" style="background:#7c9fc9;color:#fff;font-family:var(--font-head);font-weight:600;font-size:12px;padding:6px 14px;border-radius:var(--radius);text-decoration:none;white-space:nowrap;">⌂ Go Home</a>
-        </div>
+      <div class="settings-section">
+        <div class="settings-section-title">Navigation</div>
+        <div class="settings-row"><div><div class="settings-row-label">Return to HomeDeck</div><div class="settings-row-sub">Go back to the Vorpic suite launcher</div></div><a href="https://hagans-consulting.github.io/vorpic-homedeck/" style="background:#7c9fc9;color:#fff;font-family:var(--font-head);font-weight:600;font-size:12px;padding:6px 14px;border-radius:var(--radius);text-decoration:none;white-space:nowrap;">⌂ Go Home</a></div>
       </div>
-
-      <div class="settings-sec">
-        <div class="settings-sec-title">Appearance</div>
-        <div class="toggle-row">
-          <div>
-            <div class="toggle-lbl">Dark Mode</div>
-            <div class="toggle-sub">Use dark theme</div>
-          </div>
-          <div class="toggle" id="darkToggle" onclick="toggleDark()"></div>
-        </div>
+      <div class="settings-section">
+        <div class="settings-section-title">Appearance</div>
+        <div class="settings-row"><div><div class="settings-row-label">Dark Mode</div><div class="settings-row-sub">Switch between light and dark theme</div></div><label class="toggle-switch"><input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode(this.checked)"/><span class="toggle-slider"></span></label></div>
       </div>
-
-      <div class="settings-sec">
-        <div class="settings-sec-title">About</div>
-        <div class="about-mono">Vorpic Flow — v0.5.1 beta · Hagans Consulting</div>
+      <div class="settings-section">
+        <div class="settings-section-title">Account</div>
+        <div class="settings-coming">Login, logout, and account management coming in v4.</div>
       </div>
-
-      <div class="settings-sec">
+      <div class="settings-section">
+        <div class="settings-section-title">About</div>
+        <div class="settings-coming">Vorpic Flow · v0.5.9 · Part of the Vorpic Operations Suite by Hagans Consulting.</div>
+      </div>
+      <div class="settings-section" style="margin-bottom:0">
         <button class="btn btn-block" onclick="rerunWizard()">Rerun Setup Wizard</button>
       </div>
-
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeSettings()">Cancel</button>
-      <button class="btn accent" onclick="saveSettings()">Save</button>
     </div>
   </div>
 </div>
@@ -1192,11 +1188,12 @@ let isLoadingDoc       = false;     // true while loadSOPById is populating sopD
    ===================================================================== */
 function applyTheme() {
   document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
-  document.getElementById('darkToggle').classList.toggle('on', darkMode);
+  const t = document.getElementById('dark-mode-toggle');
+  if (t) t.checked = darkMode;
 }
 
-function toggleDark() {
-  darkMode = !darkMode;
+function toggleDarkMode(val) {
+  darkMode = val;
   localStorage.setItem('vorpic_flow_theme', darkMode ? 'dark' : 'light');
   applyTheme();
 }
@@ -2153,19 +2150,17 @@ async function bulkExport() {
    ===================================================================== */
 function openSettings() {
   document.getElementById('groqKeyField').value = localStorage.getItem('vorpic_flow_key_groq') || '';
+  const t = document.getElementById('dark-mode-toggle');
+  if (t) t.checked = darkMode;
   document.getElementById('overlaySettings').classList.add('open');
 }
 
-function closeSettings() { document.getElementById('overlaySettings').classList.remove('open'); }
-
-function saveSettings() {
+function closeSettings() {
   const key = document.getElementById('groqKeyField').value.trim();
   if (key) localStorage.setItem('vorpic_flow_key_groq', key);
   else localStorage.removeItem('vorpic_flow_key_groq');
-  localStorage.setItem('vorpic_flow_theme', darkMode ? 'dark' : 'light');
   updateBanner();
-  closeSettings();
-  toast('Settings saved.', 'ok');
+  document.getElementById('overlaySettings').classList.remove('open');
 }
 
 /* =====================================================================
