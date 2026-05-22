@@ -76,8 +76,10 @@
 
     /* ── TABS ── */
     .tabs-nav {
-      display: flex; background: var(--bg2); border-bottom: 1px solid var(--border);
-      padding: 0 24px;
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+    }
+    .tabs-nav-inner {
+      max-width: 1400px; margin: 0 auto; padding: 0 28px; display: flex;
     }
     .tab-btn {
       padding: 12px 18px; background: none; border: none;
@@ -94,7 +96,7 @@
     .tab-pane.active { display: flex; }
 
     /* ── CREATE TAB ── */
-    #pane-generator { overflow-y: auto; align-items: center; padding: 32px 24px; }
+    #pane-generator { overflow-y: auto; align-items: center; padding: 32px 28px; }
     #pane-generator .input-panel {
       max-width: 680px; width: 100%; border: 1px solid var(--border);
       border-radius: var(--radius-lg); height: auto; overflow: visible;
@@ -103,7 +105,7 @@
     #pane-generator .form-grp-stretch .textarea-raw { min-height: 220px; }
 
     /* ── WORKSPACE TAB ── */
-    #pane-workspace { overflow: hidden; }
+    #pane-workspace { overflow: hidden; max-width: 1400px; margin: 0 auto; padding: 0 28px; width: 100%; }
     #pane-workspace .output-panel { flex: 1; height: 100%; }
 
     /* ── INPUT PANEL ── */
@@ -250,6 +252,7 @@
     .sop-section-body p  { margin-bottom: 8px; }
 
     /* ── LIBRARY FOLDERS ── */
+    #pane-library { max-width: 1400px; margin: 0 auto; padding: 0 28px; width: 100%; }
     .lib-layout { display: flex; height: 100%; overflow: hidden; }
     .lib-sidebar {
       width: 196px; flex-shrink: 0;
@@ -511,7 +514,7 @@
     /* ── SETUP BANNER ── */
     .setup-banner {
       display: flex; align-items: center; gap: 10px;
-      height: 42px; padding: 0 24px; flex-shrink: 0;
+      height: 42px; padding: 0 28px; flex-shrink: 0;
       background: rgba(245,166,35,0.10); border-bottom: 1px solid rgba(245,166,35,0.25);
       color: var(--amber); font-size: 13px;
     }
@@ -691,9 +694,11 @@
 
 <!-- TABS NAV -->
 <nav class="tabs-nav">
-  <button class="tab-btn active" id="tbtn-generator"  onclick="switchTab('generator')">Create</button>
-  <button class="tab-btn"        id="tbtn-workspace"  onclick="switchTab('workspace')">Workspace</button>
-  <button class="tab-btn"        id="tbtn-library"    onclick="switchTab('library')">Document Library</button>
+  <div class="tabs-nav-inner">
+    <button class="tab-btn active" id="tbtn-generator"  onclick="switchTab('generator')">Create</button>
+    <button class="tab-btn"        id="tbtn-workspace"  onclick="switchTab('workspace')">Workspace</button>
+    <button class="tab-btn"        id="tbtn-library"    onclick="switchTab('library')">Document Library</button>
+  </div>
 </nav>
 
 <!-- SETUP BANNER -->
