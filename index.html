@@ -1427,6 +1427,7 @@ async function handleGenerate() {
     collapseRegenPanel();
     renderSOPDoc(autoTitle, category, currentSOPRaw, new Date());
     showWorkspaceDoc();
+    document.getElementById('btnEditGen').classList.remove('hidden');
     // Switch to Workspace (direct DOM — avoids triggering resetCreateTab)
     ['generator', 'workspace', 'library'].forEach(t => {
       document.getElementById('pane-'  + t).classList.toggle('active', t === 'workspace');
@@ -1953,6 +1954,7 @@ function clearWorkspace() {
   document.getElementById('workspaceDocView').classList.add('hidden');
   document.getElementById('readonlyBanner').classList.add('hidden');
   document.getElementById('btnEdit').classList.add('hidden');
+  document.getElementById('btnEditGen').classList.add('hidden');
   document.getElementById('btnSave').classList.remove('hidden');
   collapseRegenPanel();
 }
