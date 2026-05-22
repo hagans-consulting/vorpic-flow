@@ -288,7 +288,7 @@
     .folder-item:hover { background: var(--bg3); }
     .folder-item.active { background: var(--accent-dim); color: var(--accent); font-weight: 500; }
     .folder-item-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .folder-item-count { font-size: 11px; color: var(--text3); flex-shrink: 0; margin-left: auto; }
+    .folder-item-count { font-size: 11px; color: var(--text3); flex-shrink: 0; margin-left: auto; text-align: right; min-width: 20px; }
     .folder-item-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.1s; flex-shrink: 0; }
     .folder-item:hover .folder-item-actions { opacity: 1; }
     .folder-item.active .folder-item-count { color: var(--accent); opacity: 0.7; }
@@ -410,7 +410,7 @@
     }
     .bulk-count { font-size: 13px; font-weight: 600; color: var(--text); }
     .bulk-sep { width: 1px; height: 20px; background: var(--border2); flex-shrink: 0; }
-    .col-check { width: 40px; padding: 12px 8px !important; text-align: center; vertical-align: middle; }
+    .col-check { width: 44px; min-width: 44px; padding: 12px 0 12px 16px; vertical-align: middle; }
     .lib-checkbox { width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent); }
 
     /* ── MODALS ── */
@@ -1158,8 +1158,7 @@ let workingContent     = '';        // sopDoc.innerHTML captured on every input/
   }
   updateBanner();
   const sopDoc = document.getElementById('sopDoc');
-  sopDoc.addEventListener('input', () => { workingContent = sopDoc.innerHTML; });
-  sopDoc.addEventListener('blur', onSOPDocBlur);
+  attachSOPDocListeners();
 
   // Scroll persistence — attach listeners to each tab's scrollable container
   const scrollMap = { 'pane-generator': 'generator', 'libBody': 'library', 'outputBody': 'workspace' };
@@ -1526,9 +1525,13 @@ function showOutputActions() {
    SAVE / COPY / PRINT
    ===================================================================== */
 async function handleSave() {
-  const sopDocEl = document.getElementById('sopDoc');
-  const content  = workingContent || sopDocEl.innerHTML || currentSOPRaw || '';
-  console.log('[Vorpic Flow] handleSave: contentLen =', content.length, '| preview:', content.slice(0, 120));
+  const sopDocEl   = document.getElementById('sopDoc');
+  const fromWorking = workingContent;
+  const fromDOM     = sopDocEl.innerHTML;
+  const fromRaw     = currentSOPRaw;
+  console.log('[Vorpic Flow] handleSave sources — workingContent:', fromWorking.length, '| sopDoc.innerHTML:', fromDOM.length, '| currentSOPRaw:', (fromRaw || '').length);
+  const content = fromWorking || fromDOM || fromRaw || '';
+  console.log('[Vorpic Flow] handleSave: using contentLen =', content.length, '| preview:', content.slice(0, 120));
   if (!content.trim()) {
     toast('Content is empty — nothing to save.', 'err');
     return;
@@ -1541,10 +1544,14 @@ async function handleSave() {
     ? { ...(currentSOPMeta ?? {}), id: activeEditId, title, category, content, updated_at: now }
     : { id: crypto.randomUUID(), title, category, content, created_at: now, updated_at: now, owner_id: null };
 
+  console.log('[Vorpic Flow] handleSave: writing record', { id: record.id, title: record.title, contentLen: record.content.length });
+
   try {
     await SOPStorageService.saveSOP(record);
-    const verified = await loadSOPById(record.id);
-    console.log('[Vorpic Flow] handleSave: verified =', verified ? `id=${verified.id} contentLen=${(verified.content || '').length}` : 'NOT FOUND');
+    const verified    = await loadSOPById(record.id);
+    const verifiedLen = verified?.content?.length ?? 0;
+    console.log('[Vorpic Flow] handleSave: verified =', verified ? `id=${verified.id} contentLen=${verifiedLen}` : 'NOT FOUND');
+    if (!verifiedLen) alert('DEBUG: Content was empty after save — check console.');
     await renderFolders();
     await renderLibrary();
     toast('Saved to Document Library.', 'ok');
@@ -1822,6 +1829,7 @@ function enterReadOnlyEditMode() {
   document.getElementById('readonlyBanner').classList.add('hidden');
   document.getElementById('btnSave').classList.remove('hidden');
   document.getElementById('btnEdit').classList.add('hidden');
+  attachSOPDocListeners();
   toast('Editing — changes auto-save on blur.', 'ok');
 }
 
@@ -1894,6 +1902,18 @@ function exitEditMode() {
   sopDoc.setAttribute('contenteditable', 'false');
 }
 
+function onSOPDocInput() {
+  workingContent = document.getElementById('sopDoc').innerHTML;
+}
+
+function attachSOPDocListeners() {
+  const el = document.getElementById('sopDoc');
+  el.removeEventListener('input', onSOPDocInput);
+  el.removeEventListener('blur', onSOPDocBlur);
+  el.addEventListener('input', onSOPDocInput);
+  el.addEventListener('blur', onSOPDocBlur);
+}
+
 async function onSOPDocBlur() {
   if (!editModeActive || !activeEditId) return;
   const sopDoc  = document.getElementById('sopDoc');
@@ -1950,6 +1970,7 @@ function resetDocState() {
 function showWorkspaceDoc() {
   document.getElementById('genEmpty').classList.add('hidden');
   document.getElementById('workspaceDocView').classList.remove('hidden');
+  attachSOPDocListeners();
 }
 
 function toggleRegenPanel() {
