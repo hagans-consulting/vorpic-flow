@@ -288,7 +288,7 @@
     .folder-item:hover { background: var(--bg3); }
     .folder-item.active { background: var(--accent-dim); color: var(--accent); font-weight: 500; }
     .folder-item-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .folder-item-count { font-size: 11px; color: var(--text3); flex-shrink: 0; }
+    .folder-item-count { font-size: 11px; color: var(--text3); flex-shrink: 0; margin-left: auto; }
     .folder-item-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.1s; flex-shrink: 0; }
     .folder-item:hover .folder-item-actions { opacity: 1; }
     .folder-item.active .folder-item-count { color: var(--accent); opacity: 0.7; }
@@ -410,7 +410,7 @@
     }
     .bulk-count { font-size: 13px; font-weight: 600; color: var(--text); }
     .bulk-sep { width: 1px; height: 20px; background: var(--border2); flex-shrink: 0; }
-    .col-check { width: 36px; text-align: center; padding: 0 !important; }
+    .col-check { width: 40px; padding: 12px 8px !important; text-align: center; vertical-align: middle; }
     .lib-checkbox { width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent); }
 
     /* ── MODALS ── */
@@ -1373,7 +1373,7 @@ async function callGroq(userMsg, imageBase64, imageMime) {
   const key = localStorage.getItem('vorpic_flow_key_groq') || '';
   if (!key) throw new Error('MISSING_KEY');
   const isVision = !!imageBase64;
-  const model = isVision ? 'llama-3.2-90b-vision-preview' : 'llama-3.3-70b-versatile';
+  const model = isVision ? 'meta-llama/llama-4-scout-17b-16e-instruct' : 'llama-3.3-70b-versatile';
   const userContent = isVision
     ? [
         { type: 'text', text: userMsg || 'Generate an SOP from this document image.' },
@@ -1524,17 +1524,19 @@ function showOutputActions() {
    SAVE / COPY / PRINT
    ===================================================================== */
 async function handleSave() {
-  if (!currentSOPRaw) return;
+  const freshContent = document.getElementById('sopDoc').innerHTML;
+  if (!freshContent.trim()) return;
   const title    = document.getElementById('sopTitleInput').value.trim() || 'Untitled SOP';
   const category = workspaceCategory || 'General';
   const now      = new Date().toISOString();
 
   const record = activeEditId
-    ? { ...(currentSOPMeta ?? {}), id: activeEditId, title, category, content: currentSOPRaw, updated_at: now }
-    : { id: crypto.randomUUID(), title, category, content: currentSOPRaw, created_at: now, updated_at: now, owner_id: null };
+    ? { ...(currentSOPMeta ?? {}), id: activeEditId, title, category, content: freshContent, updated_at: now }
+    : { id: crypto.randomUUID(), title, category, content: freshContent, created_at: now, updated_at: now, owner_id: null };
 
   try {
     await SOPStorageService.saveSOP(record);
+    if (activeEditId) await loadSOPById(activeEditId);
     await renderFolders();
     await renderLibrary();
     toast('Saved to Document Library.', 'ok');
