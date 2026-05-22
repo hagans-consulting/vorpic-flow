@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,14 +10,14 @@
   <!-- STYLES -->
   <style>
     :root {
-      --bg:         #0e0f11;
-      --bg2:        #16181c;
-      --bg3:        #1e2026;
-      --border:     #2a2d35;
-      --border2:    #363a45;
-      --text:       #e8eaf0;
-      --text2:      #9499a8;
-      --text3:      #5a5f70;
+      --bg:         #f4f5f7;
+      --bg2:        #ffffff;
+      --bg3:        #ebedf2;
+      --border:     #dde0e9;
+      --border2:    #c9cdd9;
+      --text:       #1a1d26;
+      --text2:      #5a5f70;
+      --text3:      #9499a8;
       --accent:     #7c9fc9;
       --accent2:    #6389b5;
       --accent-dim: rgba(124,159,201,0.10);
@@ -27,20 +27,22 @@
       --purple:     #a78bfa;
       --radius:     6px;
       --radius-lg:  10px;
-      --shadow:     0 2px 8px rgba(0,0,0,0.4);
-      --shadow-lg:  0 8px 32px rgba(0,0,0,0.6);
+      --shadow:     0 2px 8px rgba(0,0,0,0.08);
+      --shadow-lg:  0 8px 32px rgba(0,0,0,0.15);
       --font:       'IBM Plex Sans', system-ui, sans-serif;
       --mono:       'IBM Plex Mono', monospace;
     }
-    [data-theme="light"] {
-      --bg:      #f4f5f7;
-      --bg2:     #ffffff;
-      --bg3:     #ebedf2;
-      --border:  #dde0e9;
-      --border2: #c9cdd9;
-      --text:    #1a1d26;
-      --text2:   #5a5f70;
-      --text3:   #9499a8;
+    [data-theme="dark"] {
+      --bg:        #0e0f11;
+      --bg2:       #16181c;
+      --bg3:       #1e2026;
+      --border:    #2a2d35;
+      --border2:   #363a45;
+      --text:      #e8eaf0;
+      --text2:     #9499a8;
+      --text3:     #5a5f70;
+      --shadow:    0 2px 8px rgba(0,0,0,0.4);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.6);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -54,6 +56,7 @@
     /* ── HEADER (Vorpic suite exact match) ── */
     header{background:#16181c;position:sticky;top:0;z-index:100}
     .header-inner{max-width:1400px;margin:0 auto;padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between}
+    .header-left{display:flex;align-items:center;gap:10px;}
     .brand-link{display:flex;align-items:center;gap:10px;text-decoration:none}
     .brand-link:hover .brand-name{color:rgba(255,255,255,0.8)}
     .brand-logo-mark{width:30px;height:30px;flex-shrink:0}
@@ -424,10 +427,10 @@
     .toggle::after {
       content: ''; position: absolute;
       width: 14px; height: 14px; top: 2px; left: 2px;
-      background: var(--text3); border-radius: 50%; transition: all 0.2s;
+      background: var(--text2); border-radius: 50%; transition: all 0.2s;
     }
     .toggle.on { background: var(--accent); border-color: var(--accent); }
-    .toggle.on::after { left: 18px; background: #0e0f11; }
+    .toggle.on::after { left: 18px; background: #fff; }
 
     .settings-link {
       display: flex; align-items: center; gap: 8px; padding: 9px 12px;
@@ -509,99 +512,99 @@
       width: 560px; border: none; border-radius: 14px;
       box-shadow: 0 24px 64px rgba(0,0,0,0.45); overflow: hidden;
     }
-    .wiz-progress { height: 4px; background: #e8ecf0; }
-    .wiz-progress-fill { height: 100%; background: #6389b5; transition: width 0.3s; }
+    .wiz-progress { height: 4px; background: var(--border); }
+    .wiz-progress-fill { height: 100%; background: var(--accent2); transition: width 0.3s; }
     .wiz-hdr { padding: 18px 28px 0; }
-    .wiz-step-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #9499a8; }
+    .wiz-step-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); }
     .wiz-body { padding: 24px 28px 28px; }
     .wiz-footer {
       display: flex; align-items: center; gap: 8px;
-      padding: 14px 28px 22px; border-top: 1px solid #ebedf2;
+      padding: 14px 28px 22px; border-top: 1px solid var(--border);
     }
     .wiz-footer-end { margin-left: auto; display: flex; gap: 8px; align-items: center; }
     .wiz-footer-center { margin: 0 auto; }
-    .wiz-skip { font-size: 13px; color: #9499a8; cursor: pointer; text-decoration: underline; }
-    .wiz-skip:hover { color: #5a5f70; }
+    .wiz-skip { font-size: 13px; color: var(--text3); cursor: pointer; text-decoration: underline; }
+    .wiz-skip:hover { color: var(--text2); }
 
     .wiz-welcome { text-align: center; padding: 8px 0 16px; }
     .wiz-brandmark {
       width: 56px; height: 56px; border-radius: 14px; margin: 0 auto 18px;
-      background: #7c9fc9; display: flex; align-items: center; justify-content: center;
+      background: var(--accent); display: flex; align-items: center; justify-content: center;
     }
-    .wiz-h1 { font-size: 22px; font-weight: 700; color: #1a1d26; margin-bottom: 8px; }
-    .wiz-h2 { font-size: 18px; font-weight: 700; color: #1a1d26; margin-bottom: 6px; }
-    .wiz-sub { font-size: 14px; color: #5a5f70; line-height: 1.65; max-width: 400px; margin: 0 auto; }
-    .wiz-sub-left { font-size: 13px; color: #5a5f70; line-height: 1.65; margin-bottom: 18px; }
+    .wiz-h1 { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .wiz-h2 { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .wiz-sub { font-size: 14px; color: var(--text2); line-height: 1.65; max-width: 400px; margin: 0 auto; }
+    .wiz-sub-left { font-size: 13px; color: var(--text2); line-height: 1.65; margin-bottom: 18px; }
 
     .wiz-cards { display: flex; gap: 12px; margin-top: 8px; }
     .wiz-card {
       flex: 1; padding: 16px 12px; border-radius: 10px;
-      border: 2px solid #e8ecf0; cursor: pointer; transition: all 0.15s;
-      text-align: center; background: #f8f9fb;
+      border: 2px solid var(--border); cursor: pointer; transition: all 0.15s;
+      text-align: center; background: var(--bg3);
     }
-    .wiz-card:hover { border-color: #7c9fc9; }
-    .wiz-card.selected { border-color: #6389b5; background: #f0f5fb; }
-    .wiz-card-name { font-size: 12px; font-weight: 600; color: #1a1d26; margin-bottom: 8px; line-height: 1.3; }
+    .wiz-card:hover { border-color: var(--accent); }
+    .wiz-card.selected { border-color: var(--accent2); background: var(--accent-dim); }
+    .wiz-card-name { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 8px; line-height: 1.3; }
     .wiz-card-badge {
       display: inline-block; padding: 2px 7px; border-radius: 20px;
       font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
-      background: rgba(124,159,201,0.15); color: #4a6f9a;
+      background: var(--accent-dim); color: var(--accent2);
     }
 
-    .wiz-provider-desc { font-size: 13px; color: #5a5f70; line-height: 1.65; margin-bottom: 18px; }
+    .wiz-provider-desc { font-size: 13px; color: var(--text2); line-height: 1.65; margin-bottom: 18px; }
     .wiz-steps { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
     .wiz-step-item { display: flex; gap: 12px; align-items: flex-start; }
     .wiz-step-num {
       width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
-      background: #7c9fc9; color: #fff; font-size: 11px; font-weight: 700;
+      background: var(--accent); color: #fff; font-size: 11px; font-weight: 700;
       display: flex; align-items: center; justify-content: center;
     }
-    .wiz-step-text { font-size: 13px; color: #1a1d26; line-height: 1.55; padding-top: 2px; }
-    .wiz-inline-link { color: #4a6f9a; text-decoration: underline; }
-    .wiz-inline-link:hover { color: #6389b5; }
+    .wiz-step-text { font-size: 13px; color: var(--text); line-height: 1.55; padding-top: 2px; }
+    .wiz-inline-link { color: var(--accent); text-decoration: underline; }
+    .wiz-inline-link:hover { color: var(--accent2); }
     .btn-wiz-link {
       display: inline-flex; align-items: center; gap: 6px;
       padding: 10px 18px; border-radius: 8px;
-      background: #7c9fc9; color: #fff;
+      background: var(--accent); color: #fff;
       font-size: 13px; font-weight: 600; font-family: var(--font);
       text-decoration: none; transition: background 0.15s; border: none; cursor: pointer;
     }
-    .btn-wiz-link:hover { background: #6389b5; }
+    .btn-wiz-link:hover { background: var(--accent2); }
 
     .wiz-input-wrap { position: relative; }
     .wiz-show-key {
       position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-      background: none; border: none; cursor: pointer; color: #9499a8; padding: 0; line-height: 0;
+      background: none; border: none; cursor: pointer; color: var(--text3); padding: 0; line-height: 0;
     }
-    .wiz-key-input { padding-right: 40px; background: #f8f9fb; border-color: #dde0e9; color: #1a1d26; }
-    .wiz-key-input:focus { border-color: #7c9fc9; outline: none; }
+    .wiz-key-input { padding-right: 40px; background: var(--bg3); border-color: var(--border); color: var(--text); }
+    .wiz-key-input:focus { border-color: var(--accent); outline: none; }
     .btn-wiz-test {
       margin-top: 10px; padding: 7px 14px; border-radius: 6px;
-      border: 1px solid #c9cdd9; background: #f4f5f7;
-      color: #1a1d26; font-size: 13px; font-family: var(--font); cursor: pointer; transition: all 0.15s;
+      border: 1px solid var(--border2); background: var(--bg3);
+      color: var(--text); font-size: 13px; font-family: var(--font); cursor: pointer; transition: all 0.15s;
     }
-    .btn-wiz-test:hover:not(:disabled) { border-color: #9499a8; }
+    .btn-wiz-test:hover:not(:disabled) { border-color: var(--text3); }
     .btn-wiz-test:disabled { opacity: 0.5; cursor: not-allowed; }
     .wiz-test-result { margin-top: 8px; font-size: 13px; font-weight: 500; min-height: 20px; }
-    .wiz-test-result.ok  { color: #4a6f9a; }
-    .wiz-test-result.err { color: #cc0000; }
+    .wiz-test-result.ok  { color: var(--accent); }
+    .wiz-test-result.err { color: var(--red); }
 
     .wiz-complete { text-align: center; padding: 8px 0 16px; }
     .wiz-check {
       width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 20px;
-      background: rgba(124,159,201,0.15); border: 2px solid #7c9fc9;
-      display: flex; align-items: center; justify-content: center; color: #4a6f9a;
+      background: var(--accent-dim); border: 2px solid var(--accent);
+      display: flex; align-items: center; justify-content: center; color: var(--accent2);
     }
 
     .btn-wiz {
       padding: 9px 20px; border-radius: 7px;
-      border: 1px solid #c9cdd9; background: #f4f5f7;
-      color: #1a1d26; font-size: 13px; font-weight: 500;
+      border: 1px solid var(--border2); background: var(--bg3);
+      color: var(--text); font-size: 13px; font-weight: 500;
       cursor: pointer; font-family: var(--font); transition: all 0.15s;
     }
-    .btn-wiz:hover:not(:disabled) { border-color: #9499a8; background: #ebedf2; }
-    .btn-wiz.primary { background: #7c9fc9; border-color: #7c9fc9; color: #fff; }
-    .btn-wiz.primary:hover { background: #6389b5; border-color: #6389b5; }
+    .btn-wiz:hover:not(:disabled) { border-color: var(--text3); background: var(--bg); }
+    .btn-wiz.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-wiz.primary:hover { background: var(--accent2); border-color: var(--accent2); }
     .btn-wiz:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .btn-block { width: 100%; display: flex; justify-content: center; }
@@ -642,7 +645,7 @@
 <!-- HEADER -->
 <header>
   <div class="header-inner">
-    <div style="display:flex;align-items:center;gap:10px;">
+    <div class="header-left">
       <a href="https://hagans-consulting.github.io/vorpic-homedeck/" class="brand-link" title="Return to Vorpic HomeDeck">
         <svg class="brand-logo-mark" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
           <rect width="48" height="48" rx="11" fill="#7c9fc9"/>
@@ -896,7 +899,7 @@
             <div class="toggle-lbl">Dark Mode</div>
             <div class="toggle-sub">Use dark theme</div>
           </div>
-          <div class="toggle on" id="darkToggle" onclick="toggleDark()"></div>
+          <div class="toggle" id="darkToggle" onclick="toggleDark()"></div>
         </div>
       </div>
 
@@ -1073,7 +1076,7 @@ const SOPStorageService = (() => {
 /* =====================================================================
    APP STATE
    ===================================================================== */
-let darkMode           = true;
+let darkMode           = false;
 let currentSOPRaw      = '';
 let currentSOPMeta     = null;
 let attachedFile       = null;
@@ -1087,7 +1090,7 @@ let workspaceCategory  = 'General'; // tracks current working category
    INIT
    ===================================================================== */
 (async () => {
-  darkMode = localStorage.getItem('vf-dark') !== 'false';
+  darkMode = localStorage.getItem('vorpic_flow_theme') === 'dark';
   applyTheme();
   await renderFolders();
   await renderLibrary();
@@ -1097,6 +1100,36 @@ let workspaceCategory  = 'General'; // tracks current working category
   updateBanner();
   const sopDoc = document.getElementById('sopDoc');
   sopDoc.addEventListener('blur', onSOPDocBlur);
+
+  // Scroll persistence — attach listeners to each tab's scrollable container
+  const scrollMap = { 'pane-generator': 'generator', 'libBody': 'library', 'outputBody': 'workspace' };
+  Object.entries(scrollMap).forEach(([elId, tab]) => {
+    const node = document.getElementById(elId);
+    if (node) node.addEventListener('scroll', () =>
+      localStorage.setItem('vorpic_flow_scroll_' + tab, node.scrollTop)
+    );
+  });
+
+  // Tab restore — default to 'generator'
+  const savedTab = localStorage.getItem('vorpic_flow_active_tab') || 'generator';
+  if (savedTab !== 'generator') {
+    ['generator', 'workspace', 'library'].forEach(t => {
+      document.getElementById('pane-'  + t).classList.toggle('active', t === savedTab);
+      document.getElementById('tbtn-' + t).classList.toggle('active', t === savedTab);
+    });
+  }
+
+  // Scroll restore — run after DOM settles
+  requestAnimationFrame(() => {
+    Object.entries(scrollMap).forEach(([elId, tab]) => {
+      const saved = localStorage.getItem('vorpic_flow_scroll_' + tab);
+      if (saved) {
+        const node = document.getElementById(elId);
+        if (node) node.scrollTop = parseInt(saved, 10);
+      }
+    });
+  });
+
   if (!localStorage.getItem('vorpic_flow_onboarded')) showWizard();
 })();
 
@@ -1110,6 +1143,7 @@ function applyTheme() {
 
 function toggleDark() {
   darkMode = !darkMode;
+  localStorage.setItem('vorpic_flow_theme', darkMode ? 'dark' : 'light');
   applyTheme();
 }
 
@@ -1123,6 +1157,7 @@ function switchTab(name) {
   });
   if (name === 'generator') resetCreateTab();
   if (name === 'library')   renderLibrary();
+  localStorage.setItem('vorpic_flow_active_tab', name);
 }
 
 function resetCreateTab() {
@@ -1433,6 +1468,17 @@ async function confirmCreateFolder() {
   const now = new Date().toISOString();
   await SOPStorageService.saveFolder({ id: crypto.randomUUID(), name, created_at: now, updated_at: now });
   await renderFolders();
+  await refreshFolderDropdowns();
+}
+
+async function refreshFolderDropdowns() {
+  const folders = await SOPStorageService.getAllFolders();
+  document.querySelectorAll('.folder-select').forEach(sel => {
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— None —</option>' +
+      folders.map(f => `<option value="${esc(f.id)}"${cur === f.id ? ' selected' : ''}>${esc(f.name)}</option>`).join('');
+    sel.value = cur;
+  });
 }
 
 function cancelCreateFolder() {
@@ -1775,7 +1821,7 @@ function saveSettings() {
   const key = document.getElementById('groqKeyField').value.trim();
   if (key) localStorage.setItem('vorpic_flow_key_groq', key);
   else localStorage.removeItem('vorpic_flow_key_groq');
-  localStorage.setItem('vf-dark', String(darkMode));
+  localStorage.setItem('vorpic_flow_theme', darkMode ? 'dark' : 'light');
   updateBanner();
   closeSettings();
   toast('Settings saved.', 'ok');
