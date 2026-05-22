@@ -1143,6 +1143,7 @@ let workspaceOrigin    = null;   // 'create' | 'library' — set on workspace en
 let workspaceCategory  = 'General'; // tracks current working category
 let selectedLibIds     = new Set(); // bulk-selected library doc IDs
 let workingContent     = '';        // sopDoc.innerHTML captured on every input/blur
+let isLoadingDoc       = false;     // true while loadSOPById is populating sopDoc
 
 /* =====================================================================
    INIT
@@ -1461,7 +1462,10 @@ function renderSOPDoc(title, category, raw, date) {
   const isHTML = trimmed.startsWith('<') || raw.includes('<h1>') || raw.includes('<div class="sop-');
   console.log('[Vorpic Flow] renderSOPDoc: detected type =', isHTML ? 'html' : 'markdown');
   if (isHTML) {
-    document.getElementById('sopDoc').innerHTML = raw;
+    const sopDocEl = document.getElementById('sopDoc');
+    sopDocEl.innerHTML = raw;
+    workingContent = sopDocEl.innerHTML;
+    setTimeout(() => { isLoadingDoc = false; }, 100);
     return;
   }
   const parsed = parseSections(raw);
@@ -1486,7 +1490,10 @@ function renderSOPDoc(title, category, raw, date) {
     h += '</div></div>';
   });
 
-  document.getElementById('sopDoc').innerHTML = h;
+  const sopDocElMd = document.getElementById('sopDoc');
+  sopDocElMd.innerHTML = h;
+  workingContent = sopDocElMd.innerHTML;
+  setTimeout(() => { isLoadingDoc = false; }, 100);
 }
 
 function parseSections(text) {
@@ -1508,9 +1515,8 @@ async function handleSave() {
   const sopDocEl   = document.getElementById('sopDoc');
   const fromWorking = workingContent;
   const fromDOM     = sopDocEl.innerHTML;
-  const fromRaw     = currentSOPRaw;
-  console.log('[Vorpic Flow] handleSave sources — workingContent:', fromWorking.length, '| sopDoc.innerHTML:', fromDOM.length, '| currentSOPRaw:', (fromRaw || '').length);
-  const content = fromWorking || fromDOM || fromRaw || '';
+  console.log('[Vorpic Flow] handleSave sources — workingContent:', fromWorking.length, '| sopDoc.innerHTML:', fromDOM.length);
+  const content = fromWorking || fromDOM || '';
   console.log('[Vorpic Flow] handleSave: using contentLen =', content.length, '| preview:', content.slice(0, 120));
   if (!content.trim()) {
     toast('Content is empty — nothing to save.', 'err');
@@ -1761,6 +1767,7 @@ async function renderLibrary() {
 }
 
 async function loadSOPById(id) {
+  isLoadingDoc = true;
   console.log('[Vorpic Flow] loadSOPById: id =', id, '| db =', SOPStorageService.dbName, '| store =', SOPStorageService.storeName);
   const all = await SOPStorageService.getAllSOPs();
   console.log('[Vorpic Flow] loadSOPById: total records =', all.length, '| ids =', all.map(x => x.id));
@@ -1887,6 +1894,7 @@ function exitEditMode() {
 }
 
 function onSOPDocInput() {
+  if (isLoadingDoc) return;
   workingContent = document.getElementById('sopDoc').innerHTML;
 }
 
@@ -1899,6 +1907,7 @@ function attachSOPDocListeners() {
 }
 
 async function onSOPDocBlur() {
+  if (isLoadingDoc) return;
   if (!editModeActive || !activeEditId) return;
   const sopDoc  = document.getElementById('sopDoc');
   workingContent = sopDoc.innerHTML;
