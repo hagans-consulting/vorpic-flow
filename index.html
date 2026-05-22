@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vorpic Flow — Knowledge Base &amp; SOP Generator</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 
@@ -31,8 +30,7 @@
       --radius-lg:  12px;
       --shadow:     0 2px 8px rgba(0,0,0,0.08);
       --shadow-lg:  0 8px 32px rgba(0,0,0,0.15);
-      --font:       'IBM Plex Sans', system-ui, sans-serif;
-      --mono:       'IBM Plex Mono', monospace;
+      --font-main:  'DM Sans', sans-serif;
       --font-head:  'Syne', sans-serif;
     }
     [data-theme="dark"] {
@@ -49,9 +47,9 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.6; }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-main); font-size: 14px; line-height: 1.6; }
     a { color: inherit; text-decoration: none; }
-    button { font-family: var(--font); }
+    button { font-family: var(--font-main); }
     .hidden { display: none !important; }
     .text-muted { color: var(--text2); }
     .text-dim   { color: var(--text3); }
@@ -67,9 +65,9 @@
     .brand-divider{width:1px;height:18px;background:rgba(255,255,255,0.15);margin:0 4px}
     .brand-product{display:flex;flex-direction:column;line-height:1.3}
     .brand-product-name{font-size:12px;color:rgba(255,255,255,0.5)}
-    .brand-product-sub{font-size:10px;color:rgba(255,255,255,0.28);font-family:var(--mono)}
+    .brand-product-sub{font-size:10px;color:rgba(255,255,255,0.28);font-family:var(--font-main)}
     .header-actions{display:flex;align-items:center;gap:8px}
-    .btn-home{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius);padding:5px 12px;color:rgba(255,255,255,0.7);font-size:12px;cursor:pointer;font-family:var(--font);transition:all 0.15s;text-decoration:none;display:flex;align-items:center;gap:5px;white-space:nowrap}
+    .btn-home{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius);padding:5px 12px;color:rgba(255,255,255,0.7);font-size:12px;cursor:pointer;font-family:var(--font-main);transition:all 0.15s;text-decoration:none;display:flex;align-items:center;gap:5px;white-space:nowrap}
     .btn-home:hover{background:rgba(255,255,255,0.16);color:#fff}
     .btn-settings{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius);width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.7);font-size:16px;cursor:pointer;transition:all 0.15s}
     .btn-settings:hover{background:rgba(255,255,255,0.16);color:#fff}
@@ -134,7 +132,7 @@
     .textarea-raw {
       width: 100%; resize: vertical;
       background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 12px; color: var(--text); font-family: var(--mono); font-size: 13px;
+      padding: 12px; color: var(--text); font-family: var(--font-main); font-size: 13px;
       outline: none; transition: border-color 0.15s; line-height: 1.6;
     }
     .textarea-raw::placeholder { color: var(--text3); }
@@ -176,7 +174,7 @@
     .form-select {
       width: 100%; padding: 8px 32px 8px 12px;
       background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
-      color: var(--text); font-family: var(--font); font-size: 13px;
+      color: var(--text); font-family: var(--font-main); font-size: 13px;
       outline: none; cursor: pointer; transition: border-color 0.15s; appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a5f70' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
       background-repeat: no-repeat; background-position: right 12px center;
@@ -203,7 +201,7 @@
     .output-title-wrap { flex: 1; min-width: 0; }
     .output-title {
       width: 100%; background: none; border: none; outline: none;
-      color: var(--text); font-family: var(--font); font-size: 15px; font-weight: 600;
+      color: var(--text); font-family: var(--font-main); font-size: 15px; font-weight: 600;
     }
     .output-title::placeholder { color: var(--text3); }
     .output-title[readonly] { cursor: default; }
@@ -297,12 +295,12 @@
     .folder-rename-input {
       flex: 1; background: var(--bg3); border: 1px solid var(--accent);
       border-radius: 3px; padding: 2px 6px; font-size: 13px;
-      color: var(--text); font-family: var(--font); outline: none; min-width: 0;
+      color: var(--text); font-family: var(--font-main); outline: none; min-width: 0;
     }
     .btn-new-folder {
       width: 100%; padding: 6px 8px; border-radius: var(--radius);
       border: 1px dashed var(--border2); background: transparent;
-      color: var(--text3); font-size: 12px; cursor: pointer; font-family: var(--font);
+      color: var(--text3); font-size: 12px; cursor: pointer; font-family: var(--font-main);
       transition: all 0.15s; display: flex; align-items: center; gap: 5px;
     }
     .btn-new-folder:hover { border-color: var(--accent); color: var(--accent); }
@@ -310,7 +308,7 @@
     .folder-create-input {
       flex: 1; background: var(--bg3); border: 1px solid var(--accent);
       border-radius: var(--radius); padding: 5px 8px; font-size: 12px;
-      color: var(--text); font-family: var(--font); outline: none; min-width: 0;
+      color: var(--text); font-family: var(--font-main); outline: none; min-width: 0;
     }
     .btn-folder-ok {
       background: var(--accent); border: none; color: #0e0f11;
@@ -321,7 +319,7 @@
     .folder-select {
       padding: 3px 24px 3px 8px; border-radius: var(--radius);
       border: 1px solid var(--border); background: var(--bg3);
-      color: var(--text2); font-family: var(--font); font-size: 12px;
+      color: var(--text2); font-family: var(--font-main); font-size: 12px;
       cursor: pointer; outline: none; appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%235a5f70' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
       background-repeat: no-repeat; background-position: right 6px center;
@@ -344,7 +342,7 @@
     /* ── REGEN PANEL ── */
     .regen-panel { border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--bg2); }
     .regen-toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px; cursor: pointer; user-select: none; }
-    .btn-regen-toggle { background: none; border: none; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--accent); font-family: var(--font); display: flex; align-items: center; gap: 6px; padding: 0; pointer-events: none; }
+    .btn-regen-toggle { background: none; border: none; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--accent); font-family: var(--font-main); display: flex; align-items: center; gap: 6px; padding: 0; pointer-events: none; }
     .regen-toggle-row:hover .btn-regen-toggle { color: var(--accent2); }
     .regen-chevron { font-size: 11px; color: var(--text3); transition: transform 0.25s; display: inline-block; line-height: 1; }
     .regen-chevron.open { transform: rotate(90deg); }
@@ -352,7 +350,7 @@
     .regen-panel-body.open { max-height: 320px; padding-top: 10px; padding-bottom: 14px; }
     .regen-panel-body .textarea-raw { resize: none; }
     .regen-bottom-row { display: flex; gap: 10px; align-items: center; }
-    .btn-regen-go { padding: 7px 14px; background: var(--accent); border: none; border-radius: var(--radius); color: #0e0f11; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--font); display: flex; align-items: center; gap: 6px; transition: background 0.15s; white-space: nowrap; }
+    .btn-regen-go { padding: 7px 14px; background: var(--accent); border: none; border-radius: var(--radius); color: #0e0f11; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--font-main); display: flex; align-items: center; gap: 6px; transition: background 0.15s; white-space: nowrap; }
     .btn-regen-go:hover:not(:disabled) { background: var(--accent2); }
     .btn-regen-go:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-action.cancel:hover { border-color: var(--red); color: var(--red); background: rgba(255,77,77,0.06); }
@@ -370,7 +368,7 @@
     .search-input {
       width: 100%; padding: 7px 12px 7px 34px;
       background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
-      color: var(--text); font-family: var(--font); font-size: 13px;
+      color: var(--text); font-family: var(--font-main); font-size: 13px;
       outline: none; transition: border-color 0.15s;
     }
     .search-input:focus { border-color: var(--accent); }
@@ -396,7 +394,7 @@
     .btn-row {
       padding: 5px 10px; border-radius: var(--radius);
       border: 1px solid var(--border); background: transparent;
-      color: var(--text2); font-family: var(--font); font-size: 12px;
+      color: var(--text2); font-family: var(--font-main); font-size: 12px;
       cursor: pointer; transition: all 0.15s;
     }
     .btn-row:hover        { border-color: var(--border2); color: var(--text); background: var(--bg3); }
@@ -445,7 +443,7 @@
     .form-input {
       width: 100%; padding: 8px 12px;
       background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius);
-      color: var(--text); font-family: var(--mono); font-size: 13px;
+      color: var(--text); font-family: var(--font-main); font-size: 13px;
       outline: none; transition: border-color 0.15s;
     }
     .form-input:focus { border-color: var(--accent); }
@@ -480,7 +478,7 @@
     .about-mono {
       padding: 10px 12px; background: var(--bg3);
       border: 1px solid var(--border); border-radius: var(--radius);
-      font-family: var(--mono); font-size: 12px; color: var(--text3);
+      font-family: var(--font-main); font-size: 12px; color: var(--text3);
     }
 
     .btn {
@@ -540,7 +538,7 @@
     .banner-dismiss {
       margin-left: auto; background: none; border: none; cursor: pointer;
       color: var(--amber); font-size: 20px; line-height: 1; padding: 2px 4px;
-      font-family: var(--font);
+      font-family: var(--font-main);
     }
     body.has-banner .content { height: calc(100vh - 141px); }
 
@@ -603,7 +601,7 @@
       display: inline-flex; align-items: center; gap: 6px;
       padding: 10px 18px; border-radius: 8px;
       background: var(--accent); color: #fff;
-      font-size: 13px; font-weight: 600; font-family: var(--font);
+      font-size: 13px; font-weight: 600; font-family: var(--font-main);
       text-decoration: none; transition: background 0.15s; border: none; cursor: pointer;
     }
     .btn-wiz-link:hover { background: var(--accent2); }
@@ -618,7 +616,7 @@
     .btn-wiz-test {
       margin-top: 10px; padding: 7px 14px; border-radius: 6px;
       border: 1px solid var(--border2); background: var(--bg3);
-      color: var(--text); font-size: 13px; font-family: var(--font); cursor: pointer; transition: all 0.15s;
+      color: var(--text); font-size: 13px; font-family: var(--font-main); cursor: pointer; transition: all 0.15s;
     }
     .btn-wiz-test:hover:not(:disabled) { border-color: var(--text3); }
     .btn-wiz-test:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -637,7 +635,7 @@
       padding: 9px 20px; border-radius: 7px;
       border: 1px solid var(--border2); background: var(--bg3);
       color: var(--text); font-size: 13px; font-weight: 500;
-      cursor: pointer; font-family: var(--font); transition: all 0.15s;
+      cursor: pointer; font-family: var(--font-main); transition: all 0.15s;
     }
     .btn-wiz:hover:not(:disabled) { border-color: var(--text3); background: var(--bg); }
     .btn-wiz.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
