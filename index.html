@@ -53,7 +53,7 @@
 
     /* ── HEADER (Vorpic suite exact match) ── */
     header{background:#16181c;position:sticky;top:0;z-index:100}
-    .header-inner{padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between}
+    .header-inner{max-width:1400px;margin:0 auto;padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between}
     .brand-link{display:flex;align-items:center;gap:10px;text-decoration:none}
     .brand-link:hover .brand-name{color:rgba(255,255,255,0.8)}
     .brand-logo-mark{width:30px;height:30px;flex-shrink:0}
@@ -307,6 +307,26 @@
       opacity: 0; transition: opacity 0.25s; pointer-events: none; white-space: nowrap;
     }
     .saved-flash.visible { opacity: 1; }
+
+    /* ── WORKSPACE DOC VIEW ── */
+    #genEmpty { flex: 1; }
+    #workspaceDocView { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+
+    /* ── REGEN PANEL ── */
+    .regen-panel { border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--bg2); }
+    .regen-toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px; cursor: pointer; user-select: none; }
+    .btn-regen-toggle { background: none; border: none; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--accent); font-family: var(--font); display: flex; align-items: center; gap: 6px; padding: 0; pointer-events: none; }
+    .regen-toggle-row:hover .btn-regen-toggle { color: var(--accent2); }
+    .regen-chevron { font-size: 11px; color: var(--text3); transition: transform 0.25s; display: inline-block; line-height: 1; }
+    .regen-chevron.open { transform: rotate(90deg); }
+    .regen-panel-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
+    .regen-panel-body.open { max-height: 320px; padding-top: 10px; padding-bottom: 14px; }
+    .regen-panel-body .textarea-raw { resize: none; }
+    .regen-bottom-row { display: flex; gap: 10px; align-items: center; }
+    .btn-regen-go { padding: 7px 14px; background: var(--accent); border: none; border-radius: var(--radius); color: #0e0f11; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--font); display: flex; align-items: center; gap: 6px; transition: background 0.15s; white-space: nowrap; }
+    .btn-regen-go:hover:not(:disabled) { background: var(--accent2); }
+    .btn-regen-go:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-action.cancel:hover { border-color: var(--red); color: var(--red); background: rgba(255,77,77,0.06); }
 
     /* ── LIBRARY ── */
     .lib-toolbar {
@@ -591,11 +611,12 @@
       * { box-sizing: border-box; }
       body { background: #fff !important; color: #1a1d26 !important; margin: 0; padding: 0; }
       header, .tabs-nav, .setup-banner, .input-panel, .output-toolbar,
-      .edit-indicator, .lib-sidebar, .saved-flash,
+      .edit-indicator, .lib-sidebar, .saved-flash, .regen-panel,
       #pane-generator, #pane-library, #toasts,
       .wiz-modal, dialog { display: none !important; }
       .content { display: block !important; height: auto !important; overflow: visible !important; }
       #pane-workspace { display: block !important; height: auto !important; overflow: visible !important; }
+      #workspaceDocView { display: flex !important; flex-direction: column !important; height: auto !important; overflow: visible !important; }
       .output-panel {
         display: block !important; width: 100% !important; height: auto !important;
         overflow: visible !important; border: none !important; padding: 0 !important;
@@ -719,39 +740,75 @@
   <!-- ── WORKSPACE TAB ── -->
   <div class="tab-pane" id="pane-workspace">
     <section class="output-panel">
-      <div id="editIndicator" class="edit-indicator hidden">Editing saved document — changes auto-save on blur</div>
-      <div class="output-toolbar">
-        <div class="output-title-wrap">
-          <input type="text" id="sopTitleInput" class="output-title" placeholder="SOP title will appear here…" readonly>
+
+      <!-- Empty state — shown when no document is active -->
+      <div class="empty" id="genEmpty">
+        <div class="empty-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         </div>
-        <span id="workspaceSavedFlash" class="saved-flash">Saved</span>
-        <button class="btn-action prim hidden" id="btnSave"     onclick="handleSave()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-          Save
-        </button>
-        <button class="btn-action hidden" id="btnCopy"     onclick="handleCopy()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Copy
-        </button>
-        <button class="btn-action hidden" id="btnPrint"    onclick="handlePrint()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          Print
-        </button>
-        <button class="btn-action hidden" id="btnDownload" onclick="handleDownload()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download
-        </button>
+        <div class="empty-title">No active document</div>
+        <div class="empty-desc">Generate one on the Create tab or open one from the Document Library.</div>
       </div>
-      <div class="output-body" id="outputBody">
-        <div class="empty" id="genEmpty">
-          <div class="empty-icon">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+
+      <!-- Document view — shown when a document is active -->
+      <div id="workspaceDocView" class="hidden">
+        <div id="editIndicator" class="edit-indicator hidden">Editing saved document — changes auto-save on blur</div>
+        <div class="output-toolbar">
+          <div class="output-title-wrap">
+            <input type="text" id="sopTitleInput" class="output-title" placeholder="SOP title will appear here…" readonly>
           </div>
-          <div class="empty-title">No active document</div>
-          <div class="empty-desc">Generate one on the Create tab or open one from the Document Library.</div>
+          <span id="workspaceSavedFlash" class="saved-flash">Saved</span>
+          <button class="btn-action cancel" id="btnCancel" onclick="handleCancel()">Cancel</button>
+          <button class="btn-action prim" id="btnSave" onclick="handleSave()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+            Save
+          </button>
+          <button class="btn-action" id="btnCopy" onclick="handleCopy()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+          </button>
+          <button class="btn-action" id="btnPrint" onclick="handlePrint()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Print
+          </button>
+          <button class="btn-action" id="btnDownload" onclick="handleDownload()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+          </button>
         </div>
-        <div class="sop-doc hidden" id="sopDoc" spellcheck="true"></div>
+        <!-- Collapsible AI regeneration panel -->
+        <div class="regen-panel" id="regenPanel">
+          <div class="regen-toggle-row" onclick="toggleRegenPanel()">
+            <span class="btn-regen-toggle">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+              Regenerate with AI
+            </span>
+            <span class="regen-chevron" id="regenChevron">▸</span>
+          </div>
+          <div class="regen-panel-body" id="regenPanelBody">
+            <textarea id="regenInput" class="textarea-raw" rows="4" placeholder="Add new notes or instructions for AI to revise this document…"></textarea>
+            <div class="regen-bottom-row">
+              <select id="regenCat" class="form-select form-select-sm">
+                <option value="General">General</option>
+                <option value="HR">HR</option>
+                <option value="IT">IT</option>
+                <option value="Operations">Operations</option>
+                <option value="Safety">Safety</option>
+                <option value="Finance">Finance</option>
+                <option value="Custom">Custom</option>
+              </select>
+              <button class="btn-regen-go" id="btnRegen" onclick="handleRegenerate()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                Regenerate SOP
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="output-body" id="outputBody">
+          <div class="sop-doc" id="sopDoc" spellcheck="true"></div>
+        </div>
       </div>
+
     </section>
   </div>
 
@@ -845,7 +902,7 @@
 
       <div class="settings-sec">
         <div class="settings-sec-title">About</div>
-        <div class="about-mono">Vorpic Flow — v0.5 beta · Hagans Consulting</div>
+        <div class="about-mono">Vorpic Flow — v0.5.1 beta · Hagans Consulting</div>
       </div>
 
       <div class="settings-sec">
@@ -1016,13 +1073,15 @@ const SOPStorageService = (() => {
 /* =====================================================================
    APP STATE
    ===================================================================== */
-let darkMode        = true;
-let currentSOPRaw   = '';
-let currentSOPMeta  = null;
-let attachedFile    = null;
-let editModeActive  = false;
-let activeEditId    = null;   // id of the record being edited in Workspace
-let activeFolderId  = null;   // null = All Documents
+let darkMode           = true;
+let currentSOPRaw      = '';
+let currentSOPMeta     = null;
+let attachedFile       = null;
+let editModeActive     = false;
+let activeEditId       = null;   // id of the record being edited in Workspace
+let activeFolderId     = null;   // null = All Documents
+let workspaceOrigin    = null;   // 'create' | 'library' — set on workspace entry
+let workspaceCategory  = 'General'; // tracks current working category
 
 /* =====================================================================
    INIT
@@ -1067,10 +1126,7 @@ function switchTab(name) {
 }
 
 function resetCreateTab() {
-  exitEditMode();
-  activeEditId   = null;
-  currentSOPRaw  = '';
-  currentSOPMeta = null;
+  clearWorkspace();
   document.getElementById('rawInput').value = '';
   document.getElementById('rawInput').placeholder = 'Paste notes, bullet points, or a rough draft...';
   removeFile();
@@ -1179,9 +1235,11 @@ async function handleGenerate() {
   exitEditMode();
 
   try {
-    currentSOPRaw  = await generateSOP(userMsg);
-    currentSOPMeta = null;
-    activeEditId   = null;
+    currentSOPRaw      = await generateSOP(userMsg);
+    currentSOPMeta     = null;
+    activeEditId       = null;
+    workspaceOrigin    = 'create';
+    workspaceCategory  = category;
 
     btn.innerHTML = '<div class="spin"></div> Naming…';
     let autoTitle = await generateSOPTitle(currentSOPRaw);
@@ -1194,9 +1252,10 @@ async function handleGenerate() {
     titleEl.value = autoTitle;
     titleEl.removeAttribute('readonly');
 
+    collapseRegenPanel();
     renderSOPDoc(autoTitle, category, currentSOPRaw, new Date());
-    showOutputActions();
-    // Switch to Workspace to show result
+    showWorkspaceDoc();
+    // Switch to Workspace (direct DOM — avoids triggering resetCreateTab)
     ['generator', 'workspace', 'library'].forEach(t => {
       document.getElementById('pane-'  + t).classList.toggle('active', t === 'workspace');
       document.getElementById('tbtn-' + t).classList.toggle('active', t === 'workspace');
@@ -1245,8 +1304,6 @@ function renderSOPDoc(title, category, raw, date) {
   });
 
   document.getElementById('sopDoc').innerHTML = h;
-  document.getElementById('sopDoc').classList.remove('hidden');
-  document.getElementById('genEmpty').classList.add('hidden');
 }
 
 function parseSections(text) {
@@ -1267,18 +1324,19 @@ function showOutputActions() {
 async function handleSave() {
   if (!currentSOPRaw) return;
   const title    = document.getElementById('sopTitleInput').value.trim() || 'Untitled SOP';
-  const category = document.getElementById('sopCat').value;
+  const category = workspaceCategory || 'General';
   const now      = new Date().toISOString();
 
-  const record = currentSOPMeta
-    ? { ...currentSOPMeta, title, category, content: currentSOPRaw, updated_at: now }
+  const record = activeEditId
+    ? { ...(currentSOPMeta ?? {}), id: activeEditId, title, category, content: currentSOPRaw, updated_at: now }
     : { id: crypto.randomUUID(), title, category, content: currentSOPRaw, created_at: now, updated_at: now, owner_id: null };
 
   try {
     await SOPStorageService.saveSOP(record);
-    currentSOPMeta = record;
-    if (!activeEditId) activeEditId = record.id;
     toast('Saved to Document Library.', 'ok');
+    const dest = workspaceOrigin || 'library';
+    clearWorkspace();
+    switchTab(dest);
   } catch { /* quota modal shown by service */ }
 }
 
@@ -1491,15 +1549,18 @@ async function renderLibrary() {
 async function openSOPRecord(id) {
   const s = await SOPStorageService.getSOP(id);
   if (!s) return;
-  currentSOPRaw  = s.content;
-  currentSOPMeta = { ...s };
-  activeEditId   = null;
-  const titleEl  = document.getElementById('sopTitleInput');
-  titleEl.value  = s.title;
+  currentSOPRaw      = s.content;
+  currentSOPMeta     = { ...s };
+  activeEditId       = null;
+  workspaceOrigin    = 'library';
+  workspaceCategory  = s.category;
+  const titleEl = document.getElementById('sopTitleInput');
+  titleEl.value = s.title;
   titleEl.removeAttribute('readonly');
-  renderSOPDoc(s.title, s.category, s.content, s.created_at);
-  showOutputActions();
   exitEditMode();
+  collapseRegenPanel();
+  renderSOPDoc(s.title, s.category, s.content, s.created_at);
+  showWorkspaceDoc();
   ['generator', 'workspace', 'library'].forEach(t => {
     document.getElementById('pane-'  + t).classList.toggle('active', t === 'workspace');
     document.getElementById('tbtn-' + t).classList.toggle('active', t === 'workspace');
@@ -1509,22 +1570,23 @@ async function openSOPRecord(id) {
 async function editSOPRecord(id) {
   const s = await SOPStorageService.getSOP(id);
   if (!s) return;
-  currentSOPRaw  = s.content;
-  currentSOPMeta = { ...s };
-  activeEditId   = s.id;
-  editModeActive = true;
+  currentSOPRaw      = s.content;
+  currentSOPMeta     = { ...s };
+  activeEditId       = s.id;
+  editModeActive     = true;
+  workspaceOrigin    = 'library';
+  workspaceCategory  = s.category;
 
   const titleEl = document.getElementById('sopTitleInput');
   titleEl.value = s.title;
   titleEl.removeAttribute('readonly');
 
+  collapseRegenPanel();
   renderSOPDoc(s.title, s.category, s.content, s.created_at);
-  const sopDoc = document.getElementById('sopDoc');
-  sopDoc.setAttribute('contenteditable', 'true');
-
+  document.getElementById('sopDoc').setAttribute('contenteditable', 'true');
   document.getElementById('editIndicator').classList.remove('hidden');
-  showOutputActions();
-  // Navigate to Workspace (not Create)
+  showWorkspaceDoc();
+  // Navigate to Workspace (direct DOM — not Create)
   ['generator', 'workspace', 'library'].forEach(t => {
     document.getElementById('pane-'  + t).classList.toggle('active', t === 'workspace');
     document.getElementById('tbtn-' + t).classList.toggle('active', t === 'workspace');
@@ -1535,25 +1597,33 @@ async function editSOPRecord(id) {
 async function downloadSOPRecord(id) {
   const s = await SOPStorageService.getSOP(id);
   if (!s) return;
-  const prev = {
-    raw: currentSOPRaw, meta: currentSOPMeta,
-    title: document.getElementById('sopTitleInput').value
-  };
+  const docView = document.getElementById('workspaceDocView');
+  const genEmpty = document.getElementById('genEmpty');
+  const sopDoc   = document.getElementById('sopDoc');
+  const wasDocViewVisible = !docView.classList.contains('hidden');
+  const prevHtml  = sopDoc.innerHTML;
+  const prevTitle = document.getElementById('sopTitleInput').value;
+  const prevRaw   = currentSOPRaw;
+  const prevMeta  = currentSOPMeta;
+
   currentSOPRaw  = s.content;
   currentSOPMeta = { ...s };
   renderSOPDoc(s.title, s.category, s.content, s.created_at);
   document.getElementById('sopTitleInput').value = s.title;
-  document.getElementById('sopDoc').classList.remove('hidden');
-  document.getElementById('genEmpty').classList.add('hidden');
+  genEmpty.classList.add('hidden');
+  docView.classList.remove('hidden');
+
   await new Promise(r => setTimeout(r, 50));
   handleDownload();
   await new Promise(r => setTimeout(r, 500));
-  currentSOPRaw  = prev.raw;
-  currentSOPMeta = prev.meta;
-  document.getElementById('sopTitleInput').value = prev.title;
-  if (!prev.raw) {
-    document.getElementById('sopDoc').classList.add('hidden');
-    document.getElementById('genEmpty').classList.remove('hidden');
+
+  currentSOPRaw  = prevRaw;
+  currentSOPMeta = prevMeta;
+  document.getElementById('sopTitleInput').value = prevTitle;
+  sopDoc.innerHTML = prevHtml;
+  if (!wasDocViewVisible) {
+    docView.classList.add('hidden');
+    genEmpty.classList.remove('hidden');
   }
 }
 
@@ -1592,6 +1662,93 @@ function showSavedFlash() {
   el.classList.add('visible');
   clearTimeout(el._t);
   el._t = setTimeout(() => el.classList.remove('visible'), 2000);
+}
+
+function clearWorkspace() {
+  currentSOPRaw      = '';
+  currentSOPMeta     = null;
+  activeEditId       = null;
+  workspaceOrigin    = null;
+  workspaceCategory  = 'General';
+  if (editModeActive) exitEditMode();
+  document.getElementById('sopDoc').innerHTML = '';
+  const titleEl = document.getElementById('sopTitleInput');
+  titleEl.value = '';
+  titleEl.setAttribute('readonly', '');
+  document.getElementById('genEmpty').classList.remove('hidden');
+  document.getElementById('workspaceDocView').classList.add('hidden');
+  collapseRegenPanel();
+}
+
+function showWorkspaceDoc() {
+  document.getElementById('genEmpty').classList.add('hidden');
+  document.getElementById('workspaceDocView').classList.remove('hidden');
+}
+
+function toggleRegenPanel() {
+  const body    = document.getElementById('regenPanelBody');
+  const chevron = document.getElementById('regenChevron');
+  const isOpen  = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chevron.classList.toggle('open', !isOpen);
+}
+
+function collapseRegenPanel() {
+  const body    = document.getElementById('regenPanelBody');
+  const chevron = document.getElementById('regenChevron');
+  if (body) { body.classList.remove('open'); }
+  if (chevron) { chevron.classList.remove('open'); }
+}
+
+function handleCancel() {
+  if (!confirm('Discard changes to this document?')) return;
+  clearWorkspace();
+  switchTab('library');
+}
+
+async function handleRegenerate() {
+  const regenInput = document.getElementById('regenInput').value.trim();
+  if (!regenInput) { toast('Add instructions or notes for regeneration first.', 'err'); return; }
+  if (!localStorage.getItem('vorpic_flow_key_groq')) {
+    toast('API key required. Open Settings to add your Groq key.', 'err');
+    openSettings();
+    return;
+  }
+  const regenCat = document.getElementById('regenCat').value;
+  const btn = document.getElementById('btnRegen');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Regenerating…';
+
+  let userMsg = regenInput;
+  if (regenCat !== 'General') userMsg = `[SOP Category: ${regenCat}]\n\n` + userMsg;
+
+  try {
+    const newContent = await generateSOP(userMsg);
+    btn.innerHTML = '<div class="spin"></div> Naming…';
+    let autoTitle = await generateSOPTitle(newContent);
+    if (!autoTitle) {
+      autoTitle = document.getElementById('sopTitleInput').value.trim()
+        || currentSOPMeta?.title
+        || `${regenCat} SOP`;
+    }
+    currentSOPRaw     = newContent;
+    workspaceCategory = regenCat;
+    if (currentSOPMeta) currentSOPMeta = { ...currentSOPMeta, content: newContent };
+    document.getElementById('sopTitleInput').value = autoTitle;
+    renderSOPDoc(autoTitle, regenCat, currentSOPRaw, new Date());
+    collapseRegenPanel();
+    toast('SOP regenerated. Review and click Save to commit.', 'ok');
+  } catch (err) {
+    if (err.message === 'MISSING_KEY') {
+      toast('API key required. Open Settings to add your Groq key.', 'err');
+      openSettings();
+    } else {
+      toast('Regeneration failed: ' + err.message, 'err');
+    }
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> Regenerate SOP';
+  }
 }
 
 async function deleteSOPRecord(id) {
