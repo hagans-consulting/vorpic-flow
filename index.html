@@ -280,7 +280,7 @@
     .lib-sidebar-inner { flex: 1; overflow-y: auto; padding: 0 6px 6px; }
     .lib-sidebar-footer { padding: 6px; border-top: 1px solid var(--border); flex-shrink: 0; }
     .folder-item {
-      display: flex; align-items: center; gap: 7px;
+      display: flex; align-items: center; gap: 7px; width: 100%;
       padding: 6px 8px; border-radius: var(--radius);
       cursor: pointer; font-size: 13px; color: var(--text2);
       transition: background 0.1s; user-select: none;
@@ -1455,6 +1455,13 @@ function renderSOPDoc(title, category, raw, date) {
     if (el && !el.innerHTML.trim()) {
       el.innerHTML = '<p class="content-error">Document content could not be loaded. Please re-open from the Library.</p>';
     }
+    return;
+  }
+  const trimmed = raw.trimStart();
+  const isHTML = trimmed.startsWith('<') || raw.includes('<h1>') || raw.includes('<div class="sop-');
+  console.log('[Vorpic Flow] renderSOPDoc: detected type =', isHTML ? 'html' : 'markdown');
+  if (isHTML) {
+    document.getElementById('sopDoc').innerHTML = raw;
     return;
   }
   const parsed = parseSections(raw);
