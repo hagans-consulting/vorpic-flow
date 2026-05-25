@@ -695,6 +695,7 @@
       justify-content: space-between;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -965,11 +966,11 @@
       </div>
       <div class="settings-section">
         <div class="settings-section-title">Account</div>
-        <div class="settings-coming">Login, logout, and account management coming in v4.</div>
+        <div class="settings-row"><div><div class="settings-row-label">Signed in</div><div class="settings-row-sub" id="auth-user-email">—</div></div><button onclick="handleSignOut()" style="background:var(--red);color:#fff;font-family:var(--font-head);font-weight:600;font-size:12px;padding:6px 14px;border:none;border-radius:var(--radius);cursor:pointer;">Sign out</button></div>
       </div>
       <div class="settings-section">
         <div class="settings-section-title">About</div>
-        <div class="settings-coming">Vorpic Flow · v0.6.0 · Part of the Vorpic Operations Suite by Hagans Consulting.</div>
+        <div class="settings-coming">Vorpic Flow · v0.6.1 · Part of the Vorpic Operations Suite by Hagans Consulting.</div>
       </div>
       <div class="settings-section" style="margin-bottom:0">
         <button class="btn btn-block" onclick="rerunWizard()">Rerun Setup Wizard</button>
@@ -1013,6 +1014,26 @@
 
 <!-- SCRIPT -->
 <script>
+const SUPABASE_URL = 'https://adaekucatewzekglldod.supabase.co';
+const SUPABASE_KEY = 'sb_secret_7Vzyg2FvNFIdokiCmS3tXQ_bgS4nCcK';
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function receiveSession() {
+  const params = new URLSearchParams(window.location.search);
+  const accessToken = params.get('access_token');
+  const refreshToken = params.get('refresh_token');
+  if (accessToken && refreshToken) {
+    await _supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+    const clean = window.location.pathname;
+    window.history.replaceState({}, '', clean);
+  }
+}
+
+async function handleSignOut() {
+  await _supabase.auth.signOut();
+  window.location.href = 'https://vorpic-homedeck.netlify.app';
+}
+
 /* =====================================================================
    SOPSTORAGESERVICE — IndexedDB abstraction
    ===================================================================== */
@@ -2482,6 +2503,12 @@ function handleDownload() {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await receiveSession();
+  const { data: { user } } = await _supabase.auth.getUser();
+  if (user) document.getElementById('auth-user-email').textContent = user.email;
+});
 </script>
 <div id="footer">
   <div class="footer-left"><a href="https://hagansconsulting.com" target="_blank" rel="noopener">Built by Hagans Consulting, LLC</a></div>
@@ -2490,7 +2517,7 @@ function handleDownload() {
     <a href="#">Terms</a>
     <a href="#">Support</a>
   </div>
-  <div class="footer-right"><span class="footer-version">v0.6.0</span></div>
+  <div class="footer-right"><span class="footer-version">v0.6.1</span></div>
 </div>
 <div id="printFooter"></div>
 </body>
