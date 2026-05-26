@@ -1031,7 +1031,7 @@ async function receiveSession() {
 
 async function handleSignOut() {
   await _supabase.auth.signOut();
-  window.location.href = 'https://vorpic-homedeck.netlify.app';
+  window.location.href = 'https://vorpic-homedeck.netlify.app?logged_out=true';
 }
 
 /* =====================================================================
