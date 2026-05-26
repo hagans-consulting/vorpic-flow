@@ -970,7 +970,7 @@
       </div>
       <div class="settings-section">
         <div class="settings-section-title">About</div>
-        <div class="settings-coming">Vorpic Flow · v0.6.1 · Part of the Vorpic Operations Suite by Hagans Consulting.</div>
+        <div class="settings-coming">Vorpic Flow · v0.6.2 · Part of the Vorpic Operations Suite by Hagans Consulting.</div>
       </div>
       <div class="settings-section" style="margin-bottom:0">
         <button class="btn btn-block" onclick="rerunWizard()">Rerun Setup Wizard</button>
@@ -1017,6 +1017,8 @@
 const SUPABASE_URL = 'https://adaekucatewzekglldod.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_44OEkg7mW04nQu3rDV9Tnw_5m8qwa9_';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const db = _supabase.schema('flow');
+const currentOrgId = '05f382c9-ab1d-40d0-8ad0-3171356a969b';
 
 async function receiveSession() {
   const params = new URLSearchParams(window.location.search);
@@ -1035,122 +1037,51 @@ async function handleSignOut() {
 }
 
 /* =====================================================================
-   SOPSTORAGESERVICE — IndexedDB abstraction
+   DATA LAYER — Supabase (flow schema)
    ===================================================================== */
-const SOPStorageService = (() => {
-  const DB_NAME    = 'vorpic_flow_db';
-  const DB_VER     = 2;
-  const STORE      = 'sops';
-  const FOLD_STORE = 'folders';
-  let _db = null;
+async function saveSOP(sop) {
+  const record = { ...sop, org_id: currentOrgId };
+  const { error } = await db.from('sops').upsert(record, { onConflict: 'id' });
+  if (error) console.error('SOP save error:', error);
+}
 
-  function openDB() {
-    return new Promise((res, rej) => {
-      if (_db) { res(_db); return; }
-      const req = indexedDB.open(DB_NAME, DB_VER);
-      req.onupgradeneeded = e => {
-        const db = e.target.result;
-        if (!db.objectStoreNames.contains(STORE)) {
-          const s = db.createObjectStore(STORE, { keyPath: 'id' });
-          s.createIndex('category',   'category',   { unique: false });
-          s.createIndex('updated_at', 'updated_at', { unique: false });
-        }
-        if (!db.objectStoreNames.contains(FOLD_STORE)) {
-          db.createObjectStore(FOLD_STORE, { keyPath: 'id' });
-        }
-      };
-      req.onsuccess = e => { _db = e.target.result; res(_db); };
-      req.onerror   = e => rej(e.target.error);
-    });
-  }
+async function getAllSOPs() {
+  const { data, error } = await db.from('sops')
+    .select('*')
+    .eq('org_id', currentOrgId)
+    .order('created_at', { ascending: false });
+  if (error) console.error('SOP fetch error:', error);
+  return data || [];
+}
 
-  async function saveSOP(sop) {
-    try {
-      const db = await openDB();
-      return await new Promise((res, rej) => {
-        const tx  = db.transaction(STORE, 'readwrite');
-        const req = tx.objectStore(STORE).put(sop);
-        req.onsuccess = () => res(sop);
-        req.onerror = e => {
-          if (e.target.error?.name === 'QuotaExceededError') showQuota();
-          rej(e.target.error);
-        };
-        tx.onerror = e => {
-          if (e.target.error?.name === 'QuotaExceededError') showQuota();
-          rej(e.target.error);
-        };
-      });
-    } catch (err) {
-      showQuota();
-      throw err;
-    }
-  }
+async function getSOP(id) {
+  const { data } = await db.from('sops').select('*').eq('id', id).single();
+  return data;
+}
 
-  async function getSOP(id) {
-    const db = await openDB();
-    return new Promise((res, rej) => {
-      const req = db.transaction(STORE, 'readonly').objectStore(STORE).get(id);
-      req.onsuccess = e => res(e.target.result ?? null);
-      req.onerror   = e => rej(e.target.error);
-    });
-  }
+async function deleteSOP(id) {
+  const { error } = await db.from('sops').delete().eq('id', id);
+  if (error) console.error('SOP delete error:', error);
+}
 
-  async function getAllSOPs() {
-    try {
-      const db = await openDB();
-      return await new Promise((res, rej) => {
-        const req = db.transaction(STORE, 'readonly').objectStore(STORE).getAll();
-        req.onsuccess = e => res(e.target.result ?? []);
-        req.onerror   = e => rej(e.target.error);
-      });
-    } catch { return []; }
-  }
+async function getAllFolders() {
+  const { data } = await db.from('folders')
+    .select('*')
+    .eq('org_id', currentOrgId)
+    .order('created_at', { ascending: false });
+  return data || [];
+}
 
-  async function deleteSOP(id) {
-    const db = await openDB();
-    return new Promise((res, rej) => {
-      const req = db.transaction(STORE, 'readwrite').objectStore(STORE).delete(id);
-      req.onsuccess = () => res();
-      req.onerror   = e => rej(e.target.error);
-    });
-  }
+async function saveFolder(folder) {
+  const record = { ...folder, org_id: currentOrgId };
+  const { error } = await db.from('folders').upsert(record, { onConflict: 'id' });
+  if (error) console.error('Folder save error:', error);
+}
 
-  async function saveFolder(folder) {
-    const db = await openDB();
-    return new Promise((res, rej) => {
-      const req = db.transaction(FOLD_STORE, 'readwrite').objectStore(FOLD_STORE).put(folder);
-      req.onsuccess = () => res(folder);
-      req.onerror   = e => rej(e.target.error);
-    });
-  }
-
-  async function getAllFolders() {
-    try {
-      const db = await openDB();
-      return await new Promise((res, rej) => {
-        const req = db.transaction(FOLD_STORE, 'readonly').objectStore(FOLD_STORE).getAll();
-        req.onsuccess = e => res(e.target.result ?? []);
-        req.onerror   = e => rej(e.target.error);
-      });
-    } catch { return []; }
-  }
-
-  async function deleteFolder(id) {
-    const db = await openDB();
-    // Clear folder_id from all SOPs in this folder
-    const sops = await getAllSOPs();
-    const affected = sops.filter(s => s.folder_id === id);
-    const tx = db.transaction([STORE, FOLD_STORE], 'readwrite');
-    affected.forEach(s => tx.objectStore(STORE).put({ ...s, folder_id: null }));
-    tx.objectStore(FOLD_STORE).delete(id);
-    return new Promise((res, rej) => {
-      tx.oncomplete = () => res();
-      tx.onerror    = e => rej(e.target.error);
-    });
-  }
-
-  return { saveSOP, getSOP, getAllSOPs, deleteSOP, saveFolder, getAllFolders, deleteFolder, dbName: DB_NAME, storeName: STORE };
-})();
+async function deleteFolder(id) {
+  const { error } = await db.from('folders').delete().eq('id', id);
+  if (error) console.error('Folder delete error:', error);
+}
 
 /* =====================================================================
    APP STATE
@@ -1549,7 +1480,7 @@ async function handleSave() {
   console.log('[Vorpic Flow] handleSave: writing record', { id: record.id, title: record.title, contentLen: record.content.length });
 
   try {
-    await SOPStorageService.saveSOP(record);
+    await saveSOP(record);
     const verified    = await loadSOPById(record.id);
     const verifiedLen = verified?.content?.length ?? 0;
     console.log('[Vorpic Flow] handleSave: verified =', verified ? `id=${verified.id} contentLen=${verifiedLen}` : 'NOT FOUND');
@@ -1560,7 +1491,7 @@ async function handleSave() {
     workingContent = '';
     clearWorkspace();
     resetDocState();
-  } catch { /* quota modal shown by service */ }
+  } catch (err) { console.error('Save failed:', err); }
 }
 
 async function handleCopy() {
@@ -1593,8 +1524,8 @@ function handlePrint() {
    FOLDER MANAGEMENT
    ===================================================================== */
 async function renderFolders() {
-  const folders = await SOPStorageService.getAllFolders();
-  const sops    = await SOPStorageService.getAllSOPs();
+  const folders = await getAllFolders();
+  const sops    = await getAllSOPs();
   const el      = document.getElementById('folderList');
   if (!el) return;
 
@@ -1654,13 +1585,13 @@ async function confirmCreateFolder() {
   cancelCreateFolder();
   if (!name) return;
   const now = new Date().toISOString();
-  await SOPStorageService.saveFolder({ id: crypto.randomUUID(), name, created_at: now, updated_at: now });
+  await saveFolder({ id: crypto.randomUUID(), name, created_at: now, updated_at: now });
   await renderFolders();
   await refreshFolderDropdowns();
 }
 
 async function refreshFolderDropdowns() {
-  const folders = await SOPStorageService.getAllFolders();
+  const folders = await getAllFolders();
   document.querySelectorAll('.folder-select').forEach(sel => {
     const cur = sel.value;
     sel.innerHTML = '<option value="">— None —</option>' +
@@ -1687,9 +1618,9 @@ function startRenameFolder(id) {
   const finish = async () => {
     const newName = inp.value.trim();
     if (newName && newName !== current) {
-      const folders = await SOPStorageService.getAllFolders();
+      const folders = await getAllFolders();
       const f = folders.find(x => x.id === id);
-      if (f) await SOPStorageService.saveFolder({ ...f, name: newName, updated_at: new Date().toISOString() });
+      if (f) await saveFolder({ ...f, name: newName, updated_at: new Date().toISOString() });
     }
     await renderFolders();
   };
@@ -1703,15 +1634,15 @@ function startRenameFolder(id) {
 async function deleteFolderById(id) {
   if (!confirm('Delete this folder? Documents inside will be moved to All Documents.')) return;
   if (activeFolderId === id) activeFolderId = null;
-  await SOPStorageService.deleteFolder(id);
+  await deleteFolder(id);
   await renderFolders();
   await renderLibrary();
 }
 
 async function moveSOPToFolder(sopId, folderId) {
-  const s = await SOPStorageService.getSOP(sopId);
+  const s = await getSOP(sopId);
   if (!s) return;
-  await SOPStorageService.saveSOP({ ...s, folder_id: folderId || null, updated_at: new Date().toISOString() });
+  await saveSOP({ ...s, folder_id: folderId || null, updated_at: new Date().toISOString() });
   await renderFolders();
   await renderLibrary();
 }
@@ -1721,8 +1652,8 @@ async function moveSOPToFolder(sopId, folderId) {
    ===================================================================== */
 async function renderLibrary() {
   const [sops, folders] = await Promise.all([
-    SOPStorageService.getAllSOPs(),
-    SOPStorageService.getAllFolders()
+    getAllSOPs(),
+    getAllFolders()
   ]);
   const q    = (document.getElementById('libSearch')?.value || '').toLowerCase();
   const cat  = document.getElementById('libCat')?.value || '';
@@ -1784,10 +1715,10 @@ async function renderLibrary() {
 
 async function loadSOPById(id) {
   isLoadingDoc = true;
-  console.log('[Vorpic Flow] loadSOPById: id =', id, '| db =', SOPStorageService.dbName, '| store =', SOPStorageService.storeName);
-  const all = await SOPStorageService.getAllSOPs();
+  console.log('[Vorpic Flow] loadSOPById: id =', id);
+  const all = await getAllSOPs();
   console.log('[Vorpic Flow] loadSOPById: total records =', all.length, '| ids =', all.map(x => x.id));
-  const s = await SOPStorageService.getSOP(id);
+  const s = await getSOP(id);
   console.log('[Vorpic Flow] loadSOPById: result =', s ? { id: s.id, title: s.title, contentLen: (s.content || '').length } : 'NOT FOUND');
   if (!s) { toast('Document not found.', 'err'); return null; }
   return s;
@@ -1878,7 +1809,7 @@ async function editSOPRecord(id) {
 }
 
 async function downloadSOPRecord(id) {
-  const s = await SOPStorageService.getSOP(id);
+  const s = await getSOP(id);
   if (!s) return;
   const docView = document.getElementById('workspaceDocView');
   const genEmpty = document.getElementById('genEmpty');
@@ -1950,9 +1881,9 @@ async function onSOPDocBlur() {
   currentSOPRaw  = updated.content;
   currentSOPMeta = updated;
   try {
-    await SOPStorageService.saveSOP(updated);
+    await saveSOP(updated);
     showSavedFlash();
-  } catch { /* quota modal shown by service */ }
+  } catch (err) { console.error('Auto-save failed:', err); }
 }
 
 function showSavedFlash() {
@@ -2064,7 +1995,7 @@ async function deleteSOPRecord(id) {
   if (!confirm('Delete this SOP? This cannot be undone.')) return;
   try {
     selectedLibIds.delete(id);
-    await SOPStorageService.deleteSOP(id);
+    await deleteSOP(id);
     toast('SOP deleted.', 'ok');
     await renderFolders();
     await renderLibrary();
@@ -2100,7 +2031,7 @@ async function updateBulkToolbar() {
   if (count === 0) { toolbar.classList.add('hidden'); return; }
   toolbar.classList.remove('hidden');
   document.getElementById('bulkCount').textContent = `${count} selected`;
-  const folders = await SOPStorageService.getAllFolders();
+  const folders = await getAllFolders();
   const sel = document.getElementById('bulkFolderSel');
   sel.innerHTML = '<option value="">Move to Folder…</option><option value="__none__">— Remove from folder</option>' +
     folders.map(f => `<option value="${esc(f.id)}">${esc(f.name)}</option>`).join('');
@@ -2110,7 +2041,7 @@ async function bulkDelete() {
   const ids = [...selectedLibIds];
   if (!ids.length) return;
   if (!confirm(`Delete ${ids.length} document${ids.length > 1 ? 's' : ''}? This cannot be undone.`)) return;
-  for (const id of ids) await SOPStorageService.deleteSOP(id);
+  for (const id of ids) await deleteSOP(id);
   selectedLibIds.clear();
   toast(`${ids.length} document${ids.length > 1 ? 's' : ''} deleted.`, 'ok');
   await renderFolders();
@@ -2125,8 +2056,8 @@ async function bulkMoveToFolder() {
   if (!ids.length) return;
   const newFolderId = folderId === '__none__' ? null : folderId;
   for (const id of ids) {
-    const s = await SOPStorageService.getSOP(id);
-    if (s) await SOPStorageService.saveSOP({ ...s, folder_id: newFolderId, updated_at: new Date().toISOString() });
+    const s = await getSOP(id);
+    if (s) await saveSOP({ ...s, folder_id: newFolderId, updated_at: new Date().toISOString() });
   }
   selectedLibIds.clear();
   toast(`Moved ${ids.length} document${ids.length > 1 ? 's' : ''}.`, 'ok');
@@ -2149,7 +2080,7 @@ async function bulkExport() {
   genEmpty.classList.add('hidden');
   docView.classList.remove('hidden');
   for (const id of ids) {
-    const s = await SOPStorageService.getSOP(id);
+    const s = await getSOP(id);
     if (!s || !s.content) continue;
     currentSOPRaw  = s.content;
     currentSOPMeta = { ...s };
@@ -2517,7 +2448,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     <a href="#">Terms</a>
     <a href="#">Support</a>
   </div>
-  <div class="footer-right"><span class="footer-version">v0.6.1</span></div>
+  <div class="footer-right"><span class="footer-version">v0.6.2</span></div>
 </div>
 <div id="printFooter"></div>
 </body>
